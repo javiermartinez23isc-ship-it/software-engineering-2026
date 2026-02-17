@@ -12,7 +12,7 @@ Pagina Web
 
 Equipo y roles:
 Los Angeles de Ruth
-Coordinador -Valeria
+Coordinador -Jesahias
 Analista -Javier
 Diseñador -Nava
 Tester/QA -Jonathan
