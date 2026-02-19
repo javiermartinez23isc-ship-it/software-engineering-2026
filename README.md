@@ -11,7 +11,7 @@ El problema principal en el consultorio independiente es que las agendas se gest
 
 Que SI hace.
 
-•	Iniciar sesión y registro de usuario.
+•	Desarrollo de un sistema web. 
 •	Visualizar una agenda mostrando días y horas disponibles para una cita médica.
 •	 Registrar, editar y eliminar citas médicas.
 •	Confirmar, cancelar y reprogramar citas.
@@ -29,6 +29,7 @@ Que NO hace.
 •	Facturación médica avanzada o sistemas financieros completos.
 •	Redes sociales médicas o comunicación médica especializada.
 •	Sustitución del criterio profesional del médico.
+•	Aplicación móvil y de escritorio. 
 
 ## Tipo de sistema: 
 Página Web.
