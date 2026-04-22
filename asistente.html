@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio Nava - Panel de Asistencia</title>
+    <style>
+        /* ESTILOS */
+        :root {
+            --nava-cian: #00bcd4;
+            --nava-dark: #1a237e;
+            --bg: #f8fafc;
+            --gray-nav: #999999; /* Color de las barras */
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--nava-dark); overflow: hidden; }
+        .layout { display: flex; height: 100vh; flex-direction: column; }
+        
+        /* NAVBAR SUPERIOR */
+        .navbar-vital {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--gray-nav);
+            padding: 8px 20px;
+            margin: 15px 20px 5px 20px;
+            border-radius: 50px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            z-index: 20; 
+        }
+
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        
+        /* Botón Hamburguesa (Oculto por defecto) */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            margin-right: 15px;
+            color: #333;
+        }
+
+        .logo-container {
+            background-color: white; border-radius: 50%;
+            width: 40px; height: 40px; display: flex;
+            justify-content: center; align-items: center;
+            margin-right: 12px; overflow: hidden;
+        }
+        .logo-img { width: 90%; height: 90%; object-fit: contain; }
+        .brand-name { font-weight: 600; font-size: 1.1rem; color: #333; }
+        .logout-link { text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500; margin-right: 15px; }
+        .nav-divider { width: 1px; height: 25px; background-color: #555; margin-right: 15px; }
+        .user-profile-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+        /* CONTENEDOR PRINCIPAL */
+        .content-wrapper { display: flex; flex: 1; overflow: hidden; z-index: 1; }
+
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; background: white; border-right: 1px solid #ddd;
+            display: flex; flex-direction: column; align-items: center; padding-top: 30px;
+            transition: 0.3s ease;
+        }
+
+        /* Overlay oscuro para móviles */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 900;
+        }
+
+        .profile-circle { 
+            width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; 
+            border: 3px solid var(--nava-cian); margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            width: 85%; padding: 12px; margin: 5px 0; text-decoration: none;
+            color: var(--nava-dark); font-weight: bold; border-radius: 10px;
+            cursor: pointer; transition: 0.2s; box-sizing: border-box;
+        }
+
+        .sidebar a.active { background: var(--nava-cian); color: white; }
+        .sidebar a:hover:not(.active) { background: #e0f7fa; }
+
+        /* Contenido */
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* Formulario y Tablas Generales */
+        label { display: block; margin: 15px 0 5px; font-weight: bold; color: #64748b; font-size: 0.9rem; }
+        input, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box;
+            font-family: inherit; font-size: 1rem;
+        }
+        input:focus, textarea:focus { outline: none; border-color: var(--nava-cian); }
+
+        .btn-confirmar { 
+            background: var(--nava-cian); color: white; border: none; 
+            padding: 14px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px;
+            transition: 0.2s; font-size: 1rem;
+        }
+        .btn-confirmar:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-confirmar:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; opacity: 0.7; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        th { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; }
+        
+        .status-pill { background: #e0f7fa; color: #00838f; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+
+        /* --- ESTILOS PARA LA PANTALLA AGENDAR CITA --- */
+        .agenda-top-row { display: flex; gap: 20px; margin-top: 20px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        
+        .agenda-panel { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; flex: 1; min-width: 280px; background: white; }
+        .agenda-panel-title { background: #f1f5f9; padding: 10px 15px; border-bottom: 1px solid #cbd5e1; font-weight: 600; color: #333; font-size: 0.9rem; }
+        .agenda-panel-body { padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        
+        .agenda-btn { padding: 8px 15px; border: 1px solid #cbd5e1; background: white; border-radius: 5px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 0.9rem; color: #333; transition: 0.2s; }
+        .agenda-btn:hover { background: #e2e8f0; }
+        
+        .agenda-input-date { border: none; font-size: 1rem; color: #333; outline: none; background: transparent; width: auto; padding: 0; }
+
+        /* Tabla de Horarios Interactiva */
+        .schedule-table-wrapper { 
+            width: 100%; 
+            overflow: auto; /* Permite scroll X e Y */
+            display: none; 
+            margin-bottom: 20px;
+            max-height: 330px; 
+            border-bottom: 2px solid #333; 
+        }
+        .schedule-table { width: 100%; margin: 0 auto; border-collapse: collapse; text-align: center; background: white; border: 2px solid #333; border-bottom: none; }
+        
+        /* Encabezados pegajosos (Sticky) */
+        .schedule-table th { 
+            background: #475569; 
+            color: white; 
+            padding: 10px; 
+            border: 1px solid #333; 
+            font-weight: 500; 
+            font-size: 0.85rem; 
+            text-transform: none; 
+            position: sticky; 
+            top: 0; 
+            z-index: 5; 
+        }
+        
+        .schedule-table td { border: 1px solid #333; height: 50px; position: relative; cursor: pointer; font-size: 1.2rem; transition: background 0.2s; padding: 0; text-align: center; }
+        
+        .cell-time { background: white; font-weight: 600; font-size: 0.8rem !important; color: #333; cursor: default !important; line-height: 1.2; }
+        .cell-free { background: white; }
+        .cell-free:hover { background: #f8fafc; }
+        .cell-locked { background: #a1a1aa; cursor: not-allowed !important; }
+        .cell-selected { background: var(--nava-cian); color: white; }
+        
+        /* Modal de Alerta Custom */
+        .alert-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 99; }
+        .alert-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid #333; border-radius: 8px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100; text-align: center; min-width: 300px; }
+        .alert-icon { font-size: 2rem; margin-bottom: 10px; }
+        .alert-text { margin-bottom: 20px; font-weight: 600; color: #333; font-size: 1.1rem; }
+
+        /* --- RESPONSIVE DESIGN (MÓVILES) --- */
+        @media (max-width: 768px) {
+            .hamburger-btn { display: block; }
+            .brand-name { display: none; }
+            
+            /* Ajustes para la tabla de horarios en dispositivos móviles */
+            .schedule-table-wrapper { 
+                /* Se ajustó a 180px para mostrar el header + 5 filas aprox */
+                max-height: 180px; 
+            }
+            .schedule-table th { 
+                font-size: 0.7rem; 
+                padding: 4px; 
+            }
+            .schedule-table td { 
+                height: 30px; 
+                font-size: 0.9rem; 
+            }
+            .cell-time { 
+                font-size: 0.65rem !important; 
+            }
+
+            /* Sidebar Oculta que se despliega */
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                height: 100vh;
+                z-index: 1000;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            }
+            .sidebar.open { left: 0; }
+            .sidebar-overlay.active { display: block; }
+            
+            .main { padding: 20px; }
+            .navbar-vital { margin: 10px; border-radius: 15px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="layout">
+        
+        <nav class="navbar-vital">
+            <div class="nav-left">
+                <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+                <div class="logo-container">
+                    <img src="logo_agenda_vital.png" alt="Logo" class="logo-img">
+                </div>
+                <span class="brand-name">Agenda Vital</span>
+            </div>
+            <div class="nav-right">
+                <a href="login.html" class="logout-link">Cerrar Sesión</a>
+                <div class="nav-divider"></div>
+                <div class="user-profile-nav">
+                    <span style="font-size: 1.4rem;">👤</span>
+                    <span>Usuario</span> 
+                </div>
+            </div>
+        </nav>
+
+        <div class="content-wrapper">
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+
+            <nav class="sidebar" id="sidebar">
+                <div class="profile-circle"></div>
+                <h3>Asistente</h3>
+                <p style="margin-top: 0; font-size: 0.9rem; color: #64748b;">Agenda Vital</p>
+                <hr width="80%" style="margin: 20px 0; border: 0.5px solid #eee;">
+                
+                <a onclick="ver('agenda')" id="m-agenda" class="menu-link active">📅 Agenda Dr. Nava</a>
+                <a onclick="ver('nuevo')" id="m-nuevo" class="menu-link">🗓️ Registrar Cita</a>
+                <a onclick="ver('registro')" id="m-registro" class="menu-link">👤 Registrar Paciente</a>
+            </nav>
+
+            <main class="main">
+
+                <div id="v-agenda" class="section active">
+                    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h1 style="margin: 0;">Agenda del Dr. Nava</h1>
+                    </header>
+
+                    <div class="card" style="overflow-x: auto;">
+                        <h3 style="margin-top: 0;">Citas Programadas para Hoy</h3>
+                        <table style="min-width: 400px;">
+                            <thead>
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Hora</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Juan Pérez</td>
+                                    <td>09:00 AM</td>
+                                    <td><span class="status-pill">Pendiente</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Laura Martínez</td>
+                                    <td>11:30 AM</td>
+                                    <td><span class="status-pill">Pendiente</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn-confirmar" style="width: 100%; margin-top: 15px;" onclick="ver('nuevo')">+ Nueva Cita</button>
+                </div>
+
+                <div id="v-nuevo" class="section">
+                    <h1>🗓️ Nueva Cita para Dr. Nava</h1>
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <p style="color: #64748b; margin-top: 0;">Ingresa los datos para reservar el espacio en la agenda del doctor.</p>
+                        
+                        <label>Paciente Registrado:</label>
+                        <input type="text" placeholder="Buscar por nombre o ID...">
+
+                        <div class="agenda-top-row">
+                            <div class="agenda-panel">
+                                <div class="agenda-panel-title">Seleccionar Horario.</div>
+                                <div class="agenda-panel-body">
+                                    <input type="date" class="agenda-input-date" id="date-input">
+                                    <button class="agenda-btn" onclick="mostrarTabla()">Consultar Horarios</button>
+                                </div>
+                            </div>
+                            
+                            <div class="agenda-panel">
+                                <div class="agenda-panel-title">Horario Seleccionado</div>
+                                <div class="agenda-panel-body" style="flex-direction: column; align-items: center;">
+                                    <span id="status-text" style="color: #333; font-weight: 500;">Seleccione un horario en la tabla</span>
+                                    <div style="display: flex; gap: 15px; margin-top: 5px;">
+                                        <button class="agenda-btn" id="btn-cancelar-hora" onclick="cancelarSeleccion()" style="opacity: 0.4; pointer-events: none;">Cancelar Selección</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="schedule-table-wrapper" id="schedule-container">
+                            <table class="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Lunes</th>
+                                        <th>Martes</th>
+                                        <th>Miércoles</th>
+                                        <th>Jueves</th>
+                                        <th>Viernes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="cell-time">9:00 a.m -<br>9:30 a.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">9:30 a.m -<br>10:00 a.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">10:00 a.m -<br>10:30 a.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">10:30 a.m -<br>11:00 a.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">11:00 a.m -<br>11:30 a.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">11:30 a.m -<br>12:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">12:00 p.m -<br>12:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">12:30 p.m -<br>1:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    
+                                    <tr><td colspan="6" style="background-color: #f1f5f9; height: 10px; border: none;"></td></tr>
+
+                                    <tr><td class="cell-time">2:30 p.m -<br>3:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">3:00 p.m -<br>3:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">3:30 p.m -<br>4:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">4:00 p.m -<br>4:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">4:30 p.m -<br>5:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">5:00 p.m -<br>5:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">5:30 p.m -<br>6:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">6:00 p.m -<br>6:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">6:30 p.m -<br>7:00 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                    <tr><td class="cell-time">7:00 p.m -<br>7:30 p.m</td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td><td class="cell-free" onclick="seleccionarCelda(this)"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn-confirmar" id="btn-submit-cita" onclick="finalizarCita()" disabled>Confirmar Cita en Agenda</button>
+                        <button onclick="ver('agenda')" style="background: none; color: gray; border: none; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold;">Volver a la agenda</button>
+                    </div>
+                </div>
+
+                <div id="v-registro" class="section">
+                    <h1>👤 Crear Cuenta de Paciente</h1>
+                    <div class="card" style="max-width: 550px; margin: 0 auto;">
+                        <p style="color: #64748b; margin-top: 0;">Registra los datos del paciente para generarle sus credenciales de acceso al sistema <strong>Agenda Vital</strong>.</p>
+                        
+                        <label>Nombre Completo:</label>
+                        <input type="text" placeholder="Ej. María López">
+
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label>Teléfono de contacto:</label>
+                                <input type="tel" placeholder="10 dígitos">
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label>Correo Electrónico:</label>
+                                <input type="email" placeholder="correo@ejemplo.com">
+                            </div>
+                        </div>
+
+                        <hr style="border: 0.5px solid #e2e8f0; margin: 25px 0;">
+                        
+                        <h3 style="color: var(--nava-dark); margin: 0 0 10px 0;">Asignación de Credenciales</h3>
+                        
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="margin-top: 0;">Usuario:</label>
+                                <input type="text" placeholder="Ej. maria.lopez">
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="margin-top: 0;">Contraseña Provisional:</label>
+                                <input type="text" value="Nava2026*" readonly style="background-color: #f1f5f9; color: #475569; font-weight: bold;">
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">* El paciente deberá cambiar esta contraseña al iniciar sesión por primera vez.</p>
+
+                        <button class="btn-confirmar" onclick="finalizarRegistro()">Registrar y Generar Accesos</button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <div class="alert-overlay" id="alerta-overlay"></div>
+    <div class="alert-box" id="alerta-box">
+        <div class="alert-icon">⚠️</div>
+        <p class="alert-text">Este horario no está disponible</p>
+        <button class="agenda-btn" onclick="cerrarAlerta()">Seleccionar Otro Horario</button>
+    </div>
+
+    <script>
+        // LÓGICA DEL MENÚ HAMBURGUESA
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
+
+        function ver(seccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            // Quitar la clase active de todos los links del menú lateral
+            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+
+            // Mostrar la sección y activar el botón correspondiente
+            document.getElementById('v-' + seccion).classList.add('active');
+            document.getElementById('m-' + seccion).classList.add('active');
+
+            // Cerrar menú en móviles al hacer clic en un enlace
+            if(window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('active');
+            }
+        }
+
+        function finalizarCita() {
+            alert("¡Cita registrada con éxito en la agenda del Dr. Nava!");
+            cancelarSeleccion(); // Limpiamos la tabla después de registrar
+            ver('agenda');
+        }
+
+        function finalizarRegistro() {
+            alert("¡Paciente registrado exitosamente! Ya puede iniciar sesión con su usuario y contraseña.");
+            ver('agenda');
+        }
+
+        // --- LÓGICA DE LA TABLA DE HORARIOS ---
+        let celdaSeleccionada = null;
+
+        function mostrarTabla() {
+            document.getElementById('schedule-container').style.display = 'block';
+            if(!document.getElementById('date-input').value) {
+                document.getElementById('date-input').valueAsDate = new Date();
+            }
+        }
+
+        function seleccionarCelda(celda) {
+            // Si ya había una seleccionada, la limpiamos
+            if (celdaSeleccionada) {
+                celdaSeleccionada.classList.remove('cell-selected');
+                celdaSeleccionada.innerHTML = '';
+            }
+
+            // Marcamos la nueva celda
+            celdaSeleccionada = celda;
+            celda.classList.add('cell-selected');
+            celda.innerHTML = '⭐'; 
+
+            // Actualizamos UI panel derecho
+            document.getElementById('status-text').innerText = 'El horario está disponible';
+            const btnCancelarHora = document.getElementById('btn-cancelar-hora');
+            btnCancelarHora.style.opacity = '1';
+            btnCancelarHora.style.pointerEvents = 'auto';
+
+            // Habilitamos el botón principal de guardar cita
+            const btnSubmit = document.getElementById('btn-submit-cita');
+            btnSubmit.disabled = false;
+        }
+
+        function cancelarSeleccion() {
+            if (celdaSeleccionada) {
+                celdaSeleccionada.classList.remove('cell-selected');
+                celdaSeleccionada.innerHTML = '';
+                celdaSeleccionada = null;
+            }
+            // Restauramos UI panel derecho
+            document.getElementById('status-text').innerText = 'Seleccione un horario en la tabla';
+            const btnCancelarHora = document.getElementById('btn-cancelar-hora');
+            btnCancelarHora.style.opacity = '0.4';
+            btnCancelarHora.style.pointerEvents = 'none';
+
+            // Deshabilitamos el botón principal de guardar cita
+            const btnSubmit = document.getElementById('btn-submit-cita');
+            btnSubmit.disabled = true;
+        }
+
+        function mostrarAlerta() {
+            document.getElementById('alerta-overlay').style.display = 'block';
+            document.getElementById('alerta-box').style.display = 'block';
+        }
+
+        function cerrarAlerta() {
+            document.getElementById('alerta-overlay').style.display = 'none';
+            document.getElementById('alerta-box').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
