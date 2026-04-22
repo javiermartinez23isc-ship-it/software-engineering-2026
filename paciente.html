@@ -35,7 +35,7 @@
 
         .nav-left, .nav-right { display: flex; align-items: center; }
         
-        /* BOTÓN HAMBURGUESA (Oculto en PC por defecto) */
+        /* BOTÓN HAMBURGUESA */
         .hamburger {
             display: none;
             font-size: 1.8rem;
@@ -56,6 +56,40 @@
         .logout-link { text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500; margin-right: 15px; }
         .nav-divider { width: 1px; height: 25px; background-color: #555; margin-right: 15px; }
         .user-profile-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+        /* --- SISTEMA DE NOTIFICACIONES POR FUERA DE LA BARRA --- */
+        .bell-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 40px; /* Alineado bajo el usuario */
+            margin-top: -2px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 18; /* Por encima del contenido, por debajo del navbar */
+        }
+        
+        .notif-container { position: relative; display: flex; align-items: center; }
+        .bell-icon { font-size: 1.4rem; cursor: pointer; position: relative; user-select: none; transition: 0.2s; }
+        .bell-icon:hover { transform: scale(1.1); }
+        .notif-badge { 
+            position: absolute; top: -2px; right: -5px; background: #ef4444; color: white; 
+            border-radius: 50%; padding: 2px 5px; font-size: 0.6rem; font-weight: bold; 
+            border: 2px solid var(--bg);
+        }
+        
+        .notif-dropdown { 
+            display: none; position: absolute; top: 35px; right: 0; width: 340px; 
+            background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0; 
+        }
+        .notif-dropdown.active { display: block; animation: fadeInDown 0.2s ease-out; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .notif-header { background: #f8fafc; padding: 12px 15px; font-weight: 700; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; color: var(--nava-dark); }
+        
+        .notif-item { padding: 15px; font-size: 0.85rem; color: #475569; cursor: pointer; transition: background 0.2s; line-height: 1.5; border-left: 4px solid var(--nava-cian); }
+        .notif-item:hover { background: #f0fdfa; }
+        .notif-item strong { color: var(--nava-dark); font-size: 0.9rem; display: block; margin-bottom: 8px; }
 
         /* CONTENT */
         .content-wrapper { display: flex; flex: 1; overflow: hidden; z-index: 1; position: relative; }
@@ -165,7 +199,7 @@
         .btn-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); }
         .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        /* FOOTER ORIGINAL MÁS CHICO Y CORREGIDO A 1CM */
+        /* FOOTER */
         .footer-vital {
             background-color: var(--gray-nav);
             margin: 15px 0 0 0; 
@@ -194,11 +228,11 @@
             width: 80px; 
             height: auto; 
             z-index: 15;
-            margin-right: 36px; /* 1 cm a la izquierda del texto */
-            align-self: flex-end; /* Para que quede pegada al borde inferior */
+            margin-right: 36px;
+            align-self: flex-end; 
         }
         .footer-text { 
-            margin: 0; /* Ajustado para que el texto respete el margen de la imagen */
+            margin: 0; 
             color: #333; 
             font-size: 1.05rem; 
             font-weight: 500; 
@@ -208,7 +242,7 @@
             position: relative;
         }
 
-        /* OVERLAY OSCURO PARA EL MENÚ MÓVIL */
+        /* OVERLAY OSCURO */
         .sidebar-overlay {
             display: none;
             position: absolute;
@@ -223,22 +257,13 @@
             .brand-name { display: none; } 
             .logout-link span { display: none; }
             
-            .sidebar {
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 100%;
-                transform: translateX(-100%); 
-                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            }
+            /* Ajuste de Notificaciones en móvil */
+            .bell-wrapper { padding: 0 25px; }
+            .notif-dropdown { width: 300px; right: 0; }
             
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .sidebar-overlay.active {
-                display: block; 
-            }
+            .sidebar { position: absolute; top: 0; left: 0; height: 100%; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
 
             .profile-content { flex-direction: column; align-items: center; }
             .info-panel { width: 100%; text-align: center; }
@@ -246,41 +271,23 @@
             .footer-content { max-width: 100%; padding: 0 10px; }
             .footer-text { margin: 0; font-size: 0.85rem;} 
 
-            /* Ajuste para los botones de citas en pantallas móviles */
-            #v-citas div[style*="display: flex"] {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 8px !important;
-            }
-            #v-citas .btn {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-                flex: 1 1 30%; 
-                min-width: 100px;
-            }
+            #v-citas div[style*="display: flex"] { flex-wrap: wrap; justify-content: center; gap: 8px !important; }
+            #v-citas .btn { padding: 10px 12px; font-size: 0.85rem; flex: 1 1 30%; min-width: 100px; }
 
-            /* MODIFICACIÓN: Ajuste de la tabla para móviles para que se vea completa */
-            .schedule-table th {
-                padding: 4px 2px;
-                font-size: 0.65rem; /* Letra más chica en cabeceras */
-            }
-            .schedule-table td {
-                height: 35px; /* Filas un poco más bajas */
-                font-size: 0.9rem; /* Candados más chicos */
-            }
-            .cell-time {
-                font-size: 0.6rem !important; /* Letra más chica en la columna de la hora */
-                padding: 2px !important;
-            }
+            .schedule-table th { padding: 4px 2px; font-size: 0.65rem; }
+            .schedule-table td { height: 35px; font-size: 0.9rem; }
+            .cell-time { font-size: 0.6rem !important; padding: 2px !important; }
         }
         
         @media (max-width: 480px) {
             .footer-image { width: 70px; margin-right: 19px;}
             .footer-text { margin: 0; font-size: 0.75rem;}
-            
-            /* Ajuste extra agresivo para la tabla en pantallas MUY pequeñas */
             .schedule-table th { font-size: 0.55rem; padding: 2px 1px; }
             .cell-time { font-size: 0.55rem !important; }
+            
+            /* Ajuste extra para móviles pequeños en Notificaciones */
+            .bell-wrapper { padding: 0 15px; }
+            .notif-dropdown { width: 280px; }
         }
 
         /* Modal Alertas */
@@ -311,6 +318,29 @@
                 </div>
             </div>
         </nav>
+
+        <div class="bell-wrapper">
+            <div class="notif-container">
+                <div class="bell-icon" onclick="toggleNotificaciones()" id="campana-icono">
+                    🔔
+                    <span class="notif-badge" id="badge-notif">1</span>
+                </div>
+                
+                <div class="notif-dropdown" id="notif-dropdown">
+                    <div class="notif-header">Notificaciones Nuevas</div>
+                    <div class="notif-item" onclick="irACitasDesdeNotif()">
+                        <strong>🗓️ Recordatorio de Cita</strong>
+                        Estimado/a Jorge Humberto,<br>
+                        Le recordamos su cita programada en Consultorio Nava:<br>
+                         <strong>📅 Fecha: 15 de Abril, 2026</strong> 
+                         <strong>⏰ Hora: 10:30 AM</strong> 
+                         <strong>👨‍⚕️ Medico: Dr. Nava</strong> 
+                        Por favor, confirme para asegurar su espacio. Si necesita cancelar o reagendar, le pedimos avisarnos con 12 horas de anticipación.<br><br>
+                        Atentamente,<br>Consultorio Nava
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="content-wrapper">
             <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -504,6 +534,34 @@
     </div>
 
     <script>
+        // LÓGICA DE NOTIFICACIONES
+        function toggleNotificaciones() {
+            document.getElementById('notif-dropdown').classList.toggle('active');
+        }
+
+        function irACitasDesdeNotif() {
+            // Ocultar el dropdown
+            document.getElementById('notif-dropdown').classList.remove('active');
+            // Quitar la alerta roja simulando que ya se leyó
+            const badge = document.getElementById('badge-notif');
+            if(badge) badge.style.display = 'none';
+            // Ir a la sección de citas
+            ver('citas');
+        }
+
+        // Cerrar el menú si se hace clic fuera de él
+        window.onclick = function(event) {
+            if (!event.target.matches('.bell-icon') && !event.target.closest('.notif-container')) {
+                var dropdowns = document.getElementsByClassName("notif-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('active')) {
+                        openDropdown.classList.remove('active');
+                    }
+                }
+            }
+        }
+
         // Función JS para la hamburguesa
         function toggleSidebar() {
             const sidebar = document.getElementById('main-sidebar');
