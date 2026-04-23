@@ -24,7 +24,7 @@ Tecnologías:
 •	CSS.
 •	JavaScript .
 
-	Capa 2: Lógica de negocios.
+	Capa 2: Lógica de negocios.
 En esta capa se procesan las solicitudes del sistema y se aplican las reglas del negocio.
 Ejemplo:
 •	Verificar disponibilidad de horarios.
@@ -35,7 +35,7 @@ Ejemplo:
 Tecnologías:
 •	PHP.
 
-	Capa 3: Capa de acceso de datos.
+	Capa 3: Capa de acceso de datos.
 Aquí se gestionan las operaciones CRUD. En esta capa se gestiona la comunicación con la base de datos donde se almacena la información del sistema.
 Ejemplo:
 •	Guardar información de pacientes.
@@ -68,7 +68,7 @@ Paso 4: Navegación por el sistema Una vez en la pantalla de inicio de sesión (
 •	Escribe asistente para acceder a la vista de recepción (asistente.html).
 •	Escribe cualquier otro nombre para acceder a la vista de pacientes (paciente.html).
 
---
+---
 
 Flujo Principal Implementado.
 El flujo estructurado para agendar una cita es el siguiente:
@@ -78,7 +78,7 @@ El flujo estructurado para agendar una cita es el siguiente:
 4.	Actualización y Notificación: El sistema guarda la cita en la base de datos, bloquea ese horario (lo marca como no disponible) y envía un recordatorio automático.
 5.	Gestión interna: El personal del consultorio (doctor o asistente) inicia sesión en su panel, visualiza la cita recién creada y espera a la confirmación de asistencia del paciente.
 
---
+---
 
 
 
@@ -87,7 +87,7 @@ Actualmente, el sistema se encuentra en la fase de desarrollo:
 Durante este estado, hemos definido los alcances del proyecto, el diseño de la lógica del sistema, los roles del equipo de desarrollo y las especificaciones de lo que el software hará y no hará. 
 Tenemos las pantallas de la interfaces funcionando correctamente y completando el flujo principal del usuario (paciente).
 
---
+---
 
 Usuarios del Sistema.
 •	Pacientes: Personas que buscan agendar y gestionar sus citas de forma remota.
@@ -112,16 +112,16 @@ Qué NO hace el sistema:
 •	Sustitución del criterio profesional del médico.
 •	Aplicación móvil y de escritorio nativa (es un sistema estrictamente Web).
 
---
+---
 
-Equipo y Roles: "Los Angeles de Ruth".
+Equipo y Roles: "Los Navitas".
 •	Coordinador: Fernando.
 •	Analista: Jonathan.
 •	Diseñador: Jorge.
 •	Tester/QA: Javier.
 •	Desarrollador: Jeshaias.
 
---
+---
 
 Estado del proyecto:
 Sprint 3 – Desarrollo.
