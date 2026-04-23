@@ -70,7 +70,6 @@ El flujo estructurado para agendar una cita es el siguiente:
 Actualmente, el sistema se encuentra en la fase de desarrollo. Durante este estado, hemos trabajado las pantallas de la interfaz funcionando correctamente y completando el flujo principal del usuario (paciente).
 Diseñamos y creamos la base de datos para el sistema y realizamos el codigo necesario en php para el buen funcionamiento del sistema.
 
-**Estado del proyecto:** Sprint 3 – Desarrollo.
 
 ---
 
@@ -110,4 +109,9 @@ Diseñamos y creamos la base de datos para el sistema y realizamos el codigo nec
 * **Diseñador:** Jorge.
 * **Tester/QA:** Javier.
 * **Desarrollador:** Jeshaias.
+
+---
+
+##Estado del proyecto: 
+**Sprint 3** – Desarrollo.
 
