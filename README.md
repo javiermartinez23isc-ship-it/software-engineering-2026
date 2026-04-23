@@ -112,6 +112,6 @@ Diseñamos y creamos la base de datos para el sistema y realizamos el codigo nec
 
 ---
 
-##Estado del proyecto: 
-**Sprint 3** – Desarrollo.
+## Estado del proyecto: 
+* **Sprint 3** – Desarrollo.
 
