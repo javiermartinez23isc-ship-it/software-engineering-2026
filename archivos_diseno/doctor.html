@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio Nava - Panel del Doctor</title>
+    <style>
+        /* DISEÑO FIEL A TUS PROTOTIPOS */
+        :root {
+            --nava-cian: #00bcd4; 
+            --doctor-main: #059669; /* Verde para diferenciar al doctor */
+            --dark-blue: #111862f6; /* Azul oscuro sofisticado */
+            --bg: #f4f7f9;
+            --gray-light: #f1f5f9;
+            --gray-nav: #999999; /* Color de las barras gris original */
+            --warning: #f59e0b; /* Color para estados de advertencia/edición */
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--dark-blue); overflow: hidden; }
+        .layout { display: flex; height: 100vh; flex-direction: column; }
+        
+        /* NAVBAR SUPERIOR - RESTAURADO A GRIS CON TEXTO NEGRO */
+        .navbar-vital {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--gray-nav); 
+            padding: 8px 20px;
+            margin: 15px 20px 5px 20px;
+            border-radius: 50px;
+            color: #333; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            z-index: 20; 
+        }
+
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .logo-container {
+            background-color: white; border-radius: 50%;
+            width: 40px; height: 40px; display: flex;
+            justify-content: center; align-items: center;
+            margin-right: 12px; overflow: hidden;
+        }
+        .logo-img { width: 90%; height: 90%; object-fit: contain; }
+        
+        /* Forzamos color negro en textos específicos de la nav */
+        .brand-name { font-weight: 600; font-size: 1.1rem; color: #333; } 
+        .logout-link { text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500; margin-right: 15px; } 
+        .nav-divider { width: 1px; height: 25px; background-color: #555; margin-right: 15px; } 
+        .user-profile-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #333; } 
+
+        /* BOTÓN HAMBURGUESA (Oculto en PC por defecto) */
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            margin-right: 15px;
+            color: #333;
+            user-select: none;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .content-wrapper { display: flex; flex: 1; overflow: hidden; z-index: 1; position: relative; }
+
+        /* Sidebar Blanca */
+        .sidebar { 
+            width: 260px; background: white; border-right: 1px solid #ddd;
+            display: flex; flex-direction: column; align-items: center; padding-top: 30px;
+            transition: transform 0.3s ease;
+            z-index: 15;
+        }
+
+        .profile-circle { 
+            width: 90px; height: 90px; background: #eceff1; border-radius: 50%; 
+            border: 3px solid var(--doctor-main); margin-bottom: 10px;
+        }
+
+        .sidebar h3 { margin: 5px 0; }
+        .sidebar p { color: #78909c; font-size: 0.8rem; margin-bottom: 20px; }
+
+        .sidebar a {
+            width: 85%; padding: 12px; margin: 5px 0; text-decoration: none;
+            color: var(--dark-blue); font-weight: bold; border-radius: 12px;
+            cursor: pointer; transition: 0.3s;
+        }
+
+        .sidebar a.active { background: var(--doctor-main); color: white; }
+        .sidebar a:hover:not(.active) { background: #ecfdf5; }
+
+        /* Ilustración en la Barra Lateral */
+        .sidebar-illustration {
+            display: flex;
+            justify-content: center;
+            width: 85%; 
+            margin-top: 50px;
+        }
+        .sidebar-illustration-image {
+            width: 100%; 
+            max-width: 160px; 
+            height: auto;
+        }
+
+        /* Contenido y Secciones */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+
+        /* Títulos en color azul sofisticado solicitados */
+        .main h1, .main h3 { color: var(--dark-blue); }
+
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; }
+
+        /* Estilo de Tablas Simples (Para pacientes y asistentes) - RESTAURADO: alineación a la izquierda */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #90a4ae; font-size: 0.85rem; }
+        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; color: var(--dark-blue); }
+
+        .btn-expediente { background: var(--nava-cian); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .btn-cancelar { background: #fee2e2; color: #ef4444; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
+        /* FORMULARIOS Y GESTIÓN */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #455a64; font-size: 0.9rem; }
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 12px; border: 1px solid #cfd8dc; border-radius: 10px; box-sizing: border-box;
+            font-family: inherit; font-size: 1rem;
+        }
+        input:focus { outline: none; border-color: var(--doctor-main); }
+        input:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #64748b; }
+        
+        .btn-guardar, .btn-confirmar {
+            background: var(--doctor-main); color: white; border: none;
+            padding: 14px 20px; border-radius: 10px; font-weight: bold; cursor: pointer;
+            width: 100%; font-size: 1rem; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-guardar:hover, .btn-confirmar:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-confirmar:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; opacity: 0.7; }
+
+        .btn-editar-mini {
+            background: #fef3c7; color: var(--warning); border: 1px solid #fde68a;
+            padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn-editar-mini:hover { background: #fde68a; }
+
+        .asistentes-list { border: 1px solid #eee; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        .asistentes-list table th { background-color: var(--gray-light); padding: 10px 15px; }
+        .asistentes-list table td { padding: 10px 15px; font-size: 0.9rem; }
+        
+        .config-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; align-items: start; }
+        @media (max-width: 900px) { .config-grid { grid-template-columns: 1fr; } }
+
+        /* --- ESTILOS PARA BLOQUEAR HORARIO --- */
+        .agenda-top-row { display: flex; gap: 20px; margin-top: 20px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .agenda-panel { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; flex: 1; min-width: 280px; background: white; }
+        .agenda-panel-title { background: #f1f5f9; padding: 10px 15px; border-bottom: 1px solid #cbd5e1; font-weight: 600; color: #333; font-size: 0.9rem; }
+        .agenda-panel-body { padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        
+        .agenda-btn { padding: 8px 15px; border: 1px solid #cbd5e1; background: white; border-radius: 5px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 0.9rem; color: #333; transition: 0.2s; }
+        .agenda-btn:hover { background: #e2e8f0; }
+        .agenda-input-date { border: none; font-size: 1rem; color: #333; outline: none; background: transparent; width: auto; padding: 0; }
+
+        /* Scroll vertical y altura máxima (5 filas aprox) para TABLA DE HORARIOS SOLAMENTE */
+        .schedule-table-wrapper { width: 100%; overflow-x: auto; overflow-y: auto; max-height: 310px; display: none; margin-bottom: 20px; }
+        
+        /* Aplico estilos específicos centrados SOLO a la tabla de horarios */
+        .schedule-table { width: 100%; margin: 0 auto; border-collapse: collapse; text-align: center; background: white; border: 2px solid #333; }
+        .schedule-table th { position: sticky; top: 0; z-index: 2; background: #475569; color: white; padding: 10px; border: 1px solid #333; font-weight: 500; font-size: 0.85rem; text-transform: none; text-align: center; }
+        .schedule-table td { border: 1px solid #333; height: 50px; position: relative; cursor: pointer; font-size: 1.2rem; transition: background 0.2s; padding: 0; text-align: center; }
+        
+        /* Texto de las horas centrado */
+        .cell-time { background: white; font-weight: 600; font-size: 0.75rem !important; color: #333; cursor: default !important; line-height: 1.2; padding: 5px !important; text-align: center !important; }
+        
+        .cell-free { background: white; }
+        .cell-free:hover { background: #f8fafc; }
+        .cell-selected-block { background: #ef4444; color: white; } /* Rojo para bloqueo */
+
+        /* FOOTER - RESTAURADO A GRIS */
+        .footer-vital {
+            background-color: var(--gray-nav); 
+            margin: 15px 0 0 0; 
+            border-radius: 0; 
+            height: 30px; 
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+            flex-shrink: 0; 
+            width: 100%; 
+            display: flex;
+            align-items: center; 
+            border-top: 1px solid #333;
+            position: relative;
+            z-index: 10; 
+        }
+
+        /* --- OVERLAY Y RESPONSIVIDAD PARA MÓVILES --- */
+        .sidebar-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger { display: block; }
+            .brand-name { display: none; }
+            
+            /* MODIFICACIÓN: Ajustes para que quepan Cerrar Sesión y Usuario */
+            .user-profile-nav span:nth-child(2) { display: inline-block; font-size: 0.85rem; } /* Se mantiene "Usuario." pero más pequeño */
+            .user-profile-nav span:nth-child(1) { font-size: 1.1rem !important; } /* Ícono un poco más chico */
+            .logout-link { font-size: 0.8rem; margin-right: 8px; display: inline-block; } /* Cerrar sesión visible */
+            .nav-divider { margin-right: 8px; }
+            .navbar-vital { padding: 8px 10px; } /* Menos padding lateral en nav para hacer espacio */
+            
+            .sidebar {
+                position: absolute;
+                top: 0; left: 0; height: 100%;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+
+            .main { padding: 15px; }
+            
+            /* Reducción de la tabla de horarios para móviles */
+            .schedule-table th { padding: 4px 2px; font-size: 0.65rem; }
+            .schedule-table td { height: 35px; font-size: 0.9rem; }
+            .cell-time { font-size: 0.6rem !important; padding: 2px !important; }
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table th { font-size: 0.55rem; padding: 2px 1px; }
+            .cell-time { font-size: 0.55rem !important; }
+            /* Ajuste extra agresivo para pantallas muy chicas si es necesario */
+            .logout-link { font-size: 0.75rem; }
+            .user-profile-nav span:nth-child(2) { font-size: 0.75rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="layout">
+        <nav class="navbar-vital">
+            <div class="nav-left">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="logo-container">
+                    <img src="logo_agenda_vital.png" alt="Logo" class="logo-img">
+                </div>
+                <span class="brand-name">Agenda Vital</span>
+            </div>
+            <div class="nav-right">
+                <a href="login.html" class="logout-link">Cerrar Sesión</a>
+                <div class="nav-divider"></div>
+                <div class="user-profile-nav">
+                    <span style="font-size: 1.4rem;">👤</span>
+                    <span>Usuario.</span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="content-wrapper">
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+            <nav class="sidebar" id="main-sidebar">
+                <div class="profile-circle"></div>
+                <h3>Dr. Nava</h3>
+                <p>Consultorio Privado</p>
+                <hr width="80%" style="border: 0.5px solid #eee; margin-bottom: 20px;">
+                
+                <a href="javascript:void(0)" onclick="mostrar('agenda')" id="menu-agenda" class="active">📅 Agenda</a>
+                <a href="javascript:void(0)" onclick="mostrar('bloquear')" id="menu-bloquear">🔒 Bloquear Horario</a>
+                <a href="javascript:void(0)" onclick="mostrar('configuracion')" id="menu-configuracion">⚙️ Configuración</a>
+                
+                <div class="sidebar-illustration">
+                    <img src="imagen_2.png" alt="Ilustración" class="sidebar-illustration-image">
+                </div>
+            </nav>
+
+            <main class="main">
+
+                <div id="vista-agenda" class="seccion activa">
+                    <h1>Mi Agenda del Día</h1>
+                    <div class="card">
+                        <h3>Pacientes para Hoy</h3>
+                        <table>
+                            <thead>
+                                <tr><th>Paciente</th><th>Hora</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Juan Pérez</strong></td>
+                                    <td>09:00 AM</td>
+                                    <td>
+                                        <button class="btn-cancelar" onclick="alert('Cita cancelada por el Dr. Nava')">Cancelar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="vista-bloquear" class="seccion">
+                    <h1>🔒 Bloquear Horario en Agenda</h1>
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <p style="color: #64748b; margin-top: 0;">Selecciona una fecha y un horario para inhabilitarlo y evitar que los asistentes agenden citas en este espacio.</p>
+                        
+        
+
+                        <div class="agenda-top-row">
+                            <div class="agenda-panel">
+                                <div class="agenda-panel-title">Seleccionar Fecha</div>
+                                <div class="agenda-panel-body">
+                                    <input type="date" class="agenda-input-date" id="date-input-block">
+                                    <button class="agenda-btn" onclick="mostrarTablaBloqueo()">Consultar Horarios</button>
+                                </div>
+                            </div>
+                            
+                            <div class="agenda-panel">
+                                <div class="agenda-panel-title">Horario a Bloquear</div>
+                                <div class="agenda-panel-body" style="flex-direction: column; align-items: center;">
+                                    <span id="status-text-block" style="color: #333; font-weight: 500;">Seleccione un horario en la tabla</span>
+                                    <div style="display: flex; gap: 15px; margin-top: 5px;">
+                                        <button class="agenda-btn" id="btn-cancelar-hora-block" onclick="cancelarSeleccionBloqueo()" style="opacity: 0.4; pointer-events: none;">Cancelar Selección</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="schedule-table-wrapper" id="schedule-container-block">
+                            <table class="schedule-table">
+                                <thead>
+                                    <tr><th>Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="cell-time">9:00 a.m -<br>9:30 a.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">9:30 a.m -<br>10:00 a.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">10:00 a.m -<br>10:30 a.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">10:30 a.m -<br>11:00 a.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">11:00 a.m -<br>11:30 a.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">11:30 a.m -<br>12:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">12:00 p.m -<br>12:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">12:30 p.m -<br>1:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    
+                                    <tr><td colspan="6" style="background-color: #f1f5f9; height: 10px; border: none;"></td></tr>
+
+                                    <tr><td class="cell-time">2:30 p.m -<br>3:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">3:00 p.m -<br>3:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">3:30 p.m -<br>4:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">4:00 p.m -<br>4:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">4:30 p.m -<br>5:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">5:00 p.m -<br>5:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">5:30 p.m -<br>6:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">6:00 p.m -<br>6:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">6:30 p.m -<br>7:00 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                    <tr><td class="cell-time">7:00 p.m -<br>7:30 p.m</td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td><td class="cell-free" onclick="seleccionarCeldaBloqueo(this)"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn-confirmar" id="btn-submit-bloqueo" onclick="finalizarBloqueo()" style="background: #ef4444;" disabled>Confirmar Bloqueo de Horario</button>
+                    </div>
+                </div>
+
+                <div id="vista-configuracion" class="seccion">
+                    <h1>⚙️ Configuración</h1>
+                    
+                    <div class="config-grid">
+                        
+                        <div class="card">
+                            <h2 style="margin-top: 0; color: var(--doctor-main); font-size: 1.3rem;">Cambiar Mi Contraseña</h2>
+                            <p style="color: #78909c; font-size: 0.85rem; margin-bottom: 20px;">Actualiza tu acceso personal al sistema.</p>
+                            
+                            <div class="form-group">
+                                <label>Contraseña Actual</label>
+                                <input type="password" id="doc-pass-actual" placeholder="Ingresa tu contraseña actual">
+                            </div>
+                            <div class="form-group">
+                                <label>Nueva Contraseña</label>
+                                <input type="password" id="doc-pass-nueva" placeholder="Mínimo 8 caracteres">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar Nueva Contraseña</label>
+                                <input type="password" id="doc-pass-confirm" placeholder="Repite la nueva contraseña">
+                            </div>
+                            
+                            <button class="btn-guardar" onclick="cambiarPasswordDoc()">Actualizar Mi Contraseña</button>
+                        </div>
+
+                        <div class="card">
+                            <h2 style="margin-top: 0; color: var(--nava-cian); font-size: 1.3rem;">Gestión de Asistentes</h2>
+                            <p style="color: #78909c; font-size: 0.85rem; margin-bottom: 15px;">Administra las cuentas del personal que gestiona tu agenda.</p>
+                            
+                            <div class="asistentes-list">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Usuario</th>
+                                            <th style="text-align: right;">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Ana Gómez</strong></td>
+                                            <td style="color: #64748b;">ana.gomez</td>
+                                            <td style="text-align: right;">
+                                                <button class="btn-editar-mini" onclick="prepararEdicionAsistente('Ana Gómez', 'ana.gomez')">Cambiar Clave</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr style="border: 0.5px solid #e2e8f0; margin: 20px 0;">
+
+                            <h3 id="form-asis-title" style="margin-top: 0; font-size: 1.1rem;">Registrar Nuevo Asistente</h3>
+                            
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Nombre Completo</label>
+                                    <input type="text" id="asis-nombre" placeholder="Ej. Carlos Ruiz">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Usuario</label>
+                                    <input type="text" id="asis-user" placeholder="Ej. carlos.ruiz">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="lbl-asis-pass">Asignar Contraseña</label>
+                                <input type="password" id="asis-pass" placeholder="Escribe la contraseña para el asistente">
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-guardar" id="btn-asis-guardar" onclick="guardarAsistente()" style="background-color: var(--nava-cian);">Registrar Asistente</button>
+                                <button class="btn-guardar" id="btn-asis-cancelar" onclick="cancelarEdicionAsistente()" style="background-color: #94a3b8; display: none; width: auto; padding: 14px 15px;" title="Cancelar Edición">✖</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    
+                </div>
+
+            </main>
+        </div>
+
+        <footer class="footer-vital">
+            </footer>
+
+    </div>
+
+    <script>
+        // --- FUNCIÓN JS PARA HAMBURGUESA ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // --- NAVEGACIÓN ---
+        function mostrar(id) {
+            document.querySelectorAll('.seccion').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+
+            document.getElementById('vista-' + id).style.display = 'block';
+            document.getElementById('menu-' + id).classList.add('active');
+
+            // Cerrar menú lateral en celular al hacer clic en una opción
+            if(window.innerWidth <= 768) {
+                document.getElementById('main-sidebar').classList.remove('active');
+                document.getElementById('sidebar-overlay').classList.remove('active');
+            }
+        }
+
+        // --- LÓGICA DE BLOQUEAR HORARIO ---
+        let celdaBloqueoSeleccionada = null;
+
+        function mostrarTablaBloqueo() {
+            document.getElementById('schedule-container-block').style.display = 'block';
+            if(!document.getElementById('date-input-block').value) {
+                document.getElementById('date-input-block').valueAsDate = new Date();
+            }
+        }
+
+        function seleccionarCeldaBloqueo(celda) {
+            if (celdaBloqueoSeleccionada) {
+                celdaBloqueoSeleccionada.classList.remove('cell-selected-block');
+                celdaBloqueoSeleccionada.innerHTML = '';
+            }
+            celdaBloqueoSeleccionada = celda;
+            celda.classList.add('cell-selected-block');
+            celda.innerHTML = '🔒'; 
+
+            document.getElementById('status-text-block').innerText = 'Horario seleccionado para bloqueo';
+            const btnCancelarHoraBlock = document.getElementById('btn-cancelar-hora-block');
+            btnCancelarHoraBlock.style.opacity = '1';
+            btnCancelarHoraBlock.style.pointerEvents = 'auto';
+
+            document.getElementById('btn-submit-bloqueo').disabled = false;
+        }
+
+        function cancelarSeleccionBloqueo() {
+            if (celdaBloqueoSeleccionada) {
+                celdaBloqueoSeleccionada.classList.remove('cell-selected-block');
+                celdaBloqueoSeleccionada.innerHTML = '';
+                celdaBloqueoSeleccionada = null;
+            }
+            document.getElementById('status-text-block').innerText = 'Seleccione un horario en la tabla';
+            const btnCancelarHoraBlock = document.getElementById('btn-cancelar-hora-block');
+            btnCancelarHoraBlock.style.opacity = '0.4';
+            btnCancelarHoraBlock.style.pointerEvents = 'none';
+            document.getElementById('btn-submit-bloqueo').disabled = true;
+        }
+
+        function finalizarBloqueo() {
+            alert("¡Horario bloqueado exitosamente en tu agenda!");
+            cancelarSeleccionBloqueo();
+            mostrar('agenda');
+        }
+
+        // --- LÓGICA CONFIGURACIÓN DR ---
+        function cambiarPasswordDoc() {
+            let actual = document.getElementById('doc-pass-actual').value;
+            let nueva = document.getElementById('doc-pass-nueva').value;
+            let confirm = document.getElementById('doc-pass-confirm').value;
+
+            if(!actual || !nueva || !confirm) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+            if(nueva !== confirm) {
+                alert("Las contraseñas nuevas no coinciden.");
+                return;
+            }
+            
+            alert("¡Tu contraseña ha sido actualizada con éxito!");
+            document.getElementById('doc-pass-actual').value = '';
+            document.getElementById('doc-pass-nueva').value = '';
+            document.getElementById('doc-pass-confirm').value = '';
+        }
+
+        // --- LÓGICA CONFIGURACIÓN ASISTENTES ---
+        let modoEdicionAsistente = false;
+
+        function prepararEdicionAsistente(nombre, usuario) {
+            modoEdicionAsistente = true;
+            document.getElementById('form-asis-title').innerText = "Actualizar Contraseña de Asistente";
+            document.getElementById('form-asis-title').style.color = "var(--warning)";
+            document.getElementById('lbl-asis-pass').innerText = "Nueva Contraseña";
+            
+            document.getElementById('asis-nombre').value = nombre;
+            document.getElementById('asis-nombre').disabled = true;
+            
+            document.getElementById('asis-user').value = usuario;
+            document.getElementById('asis-user').disabled = true;
+
+            document.getElementById('asis-pass').value = '';
+            document.getElementById('asis-pass').focus();
+
+            let btnGuardar = document.getElementById('btn-asis-guardar');
+            btnGuardar.innerText = "Guardar Nueva Contraseña";
+            btnGuardar.style.backgroundColor = "var(--warning)";
+            
+            document.getElementById('btn-asis-cancelar').style.display = "block";
+        }
+
+        function cancelarEdicionAsistente() {
+            modoEdicionAsistente = false;
+            document.getElementById('form-asis-title').innerText = "Registrar Nuevo Asistente";
+            document.getElementById('form-asis-title').style.color = "inherit";
+            document.getElementById('lbl-asis-pass').innerText = "Asignar Contraseña";
+
+            let inputNombre = document.getElementById('asis-nombre');
+            inputNombre.value = '';
+            inputNombre.disabled = false;
+
+            let inputUser = document.getElementById('asis-user');
+            inputUser.value = '';
+            inputUser.disabled = false;
+
+            document.getElementById('asis-pass').value = '';
+
+            let btnGuardar = document.getElementById('btn-asis-guardar');
+            btnGuardar.innerText = "Registrar Asistente";
+            btnGuardar.style.backgroundColor = "var(--nava-cian)";
+
+            document.getElementById('btn-asis-cancelar').style.display = "none";
+        }
+
+        function guardarAsistente() {
+            let nombre = document.getElementById('asis-nombre').value;
+            let user = document.getElementById('asis-user').value;
+            let pass = document.getElementById('asis-pass').value;
+
+            if(!nombre || !user || !pass) {
+                alert("Por favor completa todos los campos requeridos.");
+                return;
+            }
+            
+            if(modoEdicionAsistente) {
+                alert("¡Se ha cambiado la contraseña del asistente " + nombre + " exitosamente!");
+            } else {
+                alert("¡Asistente " + nombre + " registrado exitosamente!\nEl usuario de acceso es: " + user);
+            }
+
+            cancelarEdicionAsistente();
+        }
+    </script>
+</body>
+</html>
