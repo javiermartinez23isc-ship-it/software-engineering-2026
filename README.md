@@ -76,11 +76,12 @@ En phpMyAdmin, selecciona la base de datos agenda_vital, ve a la pestaña SQL, p
 
 Usuarios de Prueba
 
-Rol,Usuario,Contraseña
-Doctor,doctor@nava.com,Nava2026*
-Asistente,asistente@vital.com,Asistente2026*
-Paciente,paciente1@vital.com,Nava2026*
-
+```text
+Rol, Usuario, Contraseña
+Doctor, doctor@nava.com, Nava2026*
+Asistente, asistente@vital.com, Asistente2026*
+Paciente, paciente1@vital.com, Nava2026*
+```
 Notas y Limitaciones
 Estado del Proyecto: Actualmente nos encontramos en el Sprint 4.
 
