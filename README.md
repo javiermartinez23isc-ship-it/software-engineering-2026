@@ -15,6 +15,7 @@ Servidor Local: XAMPP.
 
 Arquitectura: Diseño de tres capas (Presentación, Lógica y Datos).
 
+```text
 /AGENDAVITAL
 ├── /config             # Conexión a la BD (db.php)
 ├── /docs               # Documentación y criterios de aceptación
@@ -30,6 +31,7 @@ Arquitectura: Diseño de tres capas (Presentación, Lógica y Datos).
 │   ├── /auth           # Pantalla de Login
 │   └── /roles          # Vistas específicas según rol
 └── index.php           # Punto de entrada principal
+```
 
 Instrucciones de Instalación (Paso a Paso)
 1. Preparación de archivos
