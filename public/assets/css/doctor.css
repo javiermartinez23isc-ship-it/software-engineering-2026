@@ -1,0 +1,137 @@
+/* doctor.css - DISEÑO COMPLETO */
+:root {
+    --nava-cian: #00bcd4; 
+    --doctor-main: #059669; 
+    --dark-blue: #111862f6; 
+    --bg: #f4f7f9;
+    --gray-nav: #999999; 
+}
+
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--dark-blue); 
+    overflow: hidden; 
+}
+
+.layout { display: flex; height: 100vh; flex-direction: column; }
+
+.navbar-vital {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background-color: var(--gray-nav); 
+    padding: 8px 20px;
+    margin: 15px 20px 5px 20px; 
+    border-radius: 50px; 
+    color: #333; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    flex-shrink: 0; 
+    z-index: 20; 
+}
+
+.content-wrapper { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+.sidebar { 
+    width: 260px; 
+    background: white; 
+    border-right: 1px solid #ddd;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding-top: 30px;
+    flex-shrink: 0;
+}
+
+.profile-circle { 
+    width: 90px; 
+    height: 90px; 
+    background: #eceff1; 
+    border-radius: 50%; 
+    border: 3px solid var(--doctor-main); 
+    margin-bottom: 10px;
+}
+
+.sidebar a {
+    width: 85%; 
+    padding: 12px; 
+    margin: 5px 0; 
+    text-decoration: none;
+    color: var(--dark-blue); 
+    font-weight: bold; 
+    border-radius: 12px;
+    cursor: pointer; 
+    transition: 0.3s; 
+    box-sizing: border-box;
+}
+
+.sidebar a.active { background: var(--doctor-main); color: white; }
+
+.sidebar a:hover:not(.active) { background: #ecfdf5; }
+
+.main { flex: 1; padding: 30px; overflow-y: auto; }
+
+.seccion { display: none; }
+
+.seccion.activa { display: block; }
+
+.card { 
+    background: white; 
+    padding: 25px; 
+    border-radius: 20px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+    margin-bottom: 25px; 
+}
+
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+th { 
+    text-align: left; 
+    padding: 15px; 
+    border-bottom: 2px solid #eee; 
+    color: #90a4ae; 
+    font-size: 0.85rem; 
+}
+
+td { 
+    padding: 15px; 
+    border-bottom: 1px solid #eee; 
+    vertical-align: middle; 
+    word-wrap: break-word; 
+}
+
+.btn-atender { 
+    background: var(--doctor-main); 
+    color: white; 
+    border: none; 
+    padding: 8px 15px; 
+    border-radius: 20px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    text-decoration: none; 
+    font-size: 0.85rem; 
+    display: inline-block; 
+}
+
+.btn-cancelar { 
+    background: #fee2e2; 
+    color: #ef4444; 
+    border: none; 
+    padding: 8px 15px; 
+    border-radius: 20px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    text-decoration: none; 
+    font-size: 0.85rem; 
+    margin-left: 5px; 
+    display: inline-block; 
+}
+
+.footer-vital { 
+    background-color: var(--gray-nav); 
+    height: 30px; 
+    border-top: 1px solid #333; 
+    width: 100%; 
+    flex-shrink: 0; 
+}

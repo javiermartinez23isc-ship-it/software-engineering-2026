@@ -1,0 +1,135 @@
+/* asistente.css - DISEÑO COMPLETO */
+:root { 
+    --nava-cian: #00bcd4; 
+    --nava-dark: #1a237e; 
+    --bg: #f4f7f9; 
+    --gray-nav: #999999; 
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--nava-dark); 
+    overflow: hidden; 
+}
+
+.layout { display: flex; height: 100vh; flex-direction: column; }
+
+.navbar-vital { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background-color: var(--gray-nav); 
+    padding: 8px 20px; 
+    margin: 15px 20px 5px 20px; 
+    border-radius: 50px; 
+    color: #333; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    flex-shrink: 0; 
+    z-index: 20; 
+}
+
+.nav-left, .nav-right { display: flex; align-items: center; }
+
+.logo-container { 
+    background-color: white; 
+    border-radius: 50%; 
+    width: 40px; 
+    height: 40px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    margin-right: 12px; 
+    overflow: hidden; 
+}
+
+.logo-img { width: 90%; height: 90%; object-fit: contain; }
+
+.brand-name { font-weight: 600; font-size: 1.1rem; }
+
+.logout-link { text-decoration: none; color: #333; font-weight: 500; margin-right: 15px; }
+
+.user-profile-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+.content-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+.sidebar { 
+    width: 280px; 
+    background: white; 
+    border-right: 1px solid #e2e8f0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding-top: 20px; 
+}
+
+.profile-circle { 
+    width: 80px; 
+    height: 80px; 
+    background: #f1f5f9; 
+    border-radius: 50%; 
+    border: 4px solid var(--nava-cian); 
+    margin-bottom: 15px; 
+}
+
+.sidebar-menu { width: 100%; }
+
+.sidebar-menu a { 
+    display: block; 
+    padding: 18px 35px; 
+    text-decoration: none; 
+    color: var(--nava-dark); 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+
+.sidebar-menu a.active { background: var(--nava-cian); color: white; }
+
+.main { flex: 1; padding: 30px; overflow-y: auto; }
+
+.seccion { display: none; }
+
+.seccion.activa { display: block; }
+
+.card { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 20px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+}
+
+.schedule-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    text-align: center; 
+    border: 2px solid #333; 
+    background: white; 
+}
+
+.schedule-table th { background: #475569; color: white; padding: 12px; border: 1px solid #333; }
+
+.schedule-table td { border: 1px solid #333; height: 50px; cursor: pointer; }
+
+.cell-time { font-weight: 600; background: #f8fafc; }
+
+.cell-free:hover { background: #e0f7fa; }
+
+.cell-locked { background: #e2e8f0; color: #94a3b8; cursor: not-allowed !important; }
+
+.cell-selected { background: var(--nava-cian) !important; color: white; }
+
+.btn-submit { 
+    background: var(--nava-cian); 
+    color: white; 
+    border: none; 
+    padding: 16px; 
+    border-radius: 35px; 
+    font-weight: 700; 
+    width: 100%; 
+    cursor: pointer; 
+    margin-top: 20px; 
+}
+
+.btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
