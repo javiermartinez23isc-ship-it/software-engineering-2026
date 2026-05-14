@@ -78,11 +78,11 @@ INSERT INTO `tipo_usuario` (`id_tipo_usuario`, `nombre_tipo`) VALUES
 (3, 'Paciente');
 
 INSERT INTO `usuario` (`id_usuario`, `id_tipo_usuario`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `correo`, `contrasena_hash`, `fecha_alta`) VALUES
-(1, 1, 'Jesús Fernando', 'Escobedo', 'Rodríguez', '8715065421', 'fernando@correo.com', '$2y$10$7R.x/8GkU2KjG.lHjQ9ZueM1V9X6Z6X6Z6X6Z6X6Z6X6Z6X6Z6X6Z', '2026-05-12 11:30:00'),
-(2, 2, 'Ana Maria', 'Lopez', 'Garcia', '8711234567', 'ana.asistente@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:35:00'),
-(3, 3, 'Juan', 'Perez', 'Martinez', '8719876543', 'juan.perez@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:40:00'),
-(4, 3, 'Maria', 'Rodriguez', 'Sosa', '8712223344', 'maria.rod@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:45:00'),
-(5, 3, 'Roberto', 'Sanchez', 'Tellez', '8715556677', 'roberto.s@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:50:00'),
-(6, 3, 'Laura', 'Blanco', 'Peralta', '8718889900', 'laura.b@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:55:00'),
-(7, 3, 'Carlos', 'Jimenez', 'Ruiz', '8710001122', 'carlos.j@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 12:00:00');
+(1, 1, 'Jesús Fernando', 'Rodríguez', 'Nava', '8710000000', 'doctor@nava.com', 'Nava2026*', '2026-04-26 01:27:30'),
+(2, 2, 'Jesahias Fernando', 'Juarez', 'Palacios', '8711112233', 'asistente@vital.com', 'Asistente2026*', '2026-04-26 01:32:50'),
+(3, 3, 'Jorge Humberto', 'Esquivel', 'Cuellar', '8714445566', 'paciente1@vital.com', 'Nava2026*', '2026-04-26 01:32:50'),
+(4, 3, 'Jesús Javier', 'Martínez', 'Hernández', '8717778899', 'paciente2@vital.com', 'Nava2026*', '2026-04-26 01:32:50'),
+(5, 3, 'JONATHAN ALFREDO', NULL, NULL, NULL, 'paciente3@vital.com', 'Nava2026*', '2026-04-26 20:58:46'),
+(6, 3, 'hola', 'holaaa', NULL, NULL, 'paciente4@vital.com', 'Nava2026*', '2026-04-26 21:14:47'),
+(7, 3, 'Maria contreras', 'lopez', NULL, NULL, 'paciente5@vital.com', 'Nava2026*', '2026-04-29 01:04:55');
 ```
