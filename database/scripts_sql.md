@@ -1,3 +1,4 @@
+```sql
 -- Estructura de tabla para `tipo_usuario`
 CREATE TABLE `tipo_usuario` (
   `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT,
@@ -84,3 +85,4 @@ INSERT INTO `usuario` (`id_usuario`, `id_tipo_usuario`, `nombre`, `apellido_pate
 (5, 3, 'Roberto', 'Sanchez', 'Tellez', '8715556677', 'roberto.s@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:50:00'),
 (6, 3, 'Laura', 'Blanco', 'Peralta', '8718889900', 'laura.b@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 11:55:00'),
 (7, 3, 'Carlos', 'Jimenez', 'Ruiz', '8710001122', 'carlos.j@correo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-05-12 12:00:00');
+```
