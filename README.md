@@ -1,49 +1,87 @@
-# Nombre del proyecto: AgendaVital
+Agenda Vital
+Sistema de Gestión de Citas Médicas
+Agenda Vital es una plataforma orientada a clínicas independientes con el fin de automatizar la programación de consultas médicas. El sistema facilita la interacción entre médicos, asistentes y pacientes, centralizando la información clínica y administrativa para optimizar el flujo de trabajo operativo.
 
-## Descripción:
-El problema principal en el consultorio independiente es que las agendas se gestionan de forma manual, lo que genera desorganización, procesos tardados y poca eficiencia en la gestión de citas médicas.
+Tecnologías Utilizadas
+El proyecto se basa en un stack WAMP, garantizando compatibilidad y un despliegue ágil:
 
-## Usuario:
--Pacientes.
--Personal del consultorio (Doctor y asistente).
+Backend: PHP (Scripts dinámicos).
 
-## Alcance:
+Base de Datos: MySQL (Gestión de persistencia mediante puerto 3307).
 
-Que SI hace.
+Frontend: HTML5, CSS3 y JavaScript.
 
-•	Desarrollo de un sistema web. 
-•	Visualizar una agenda mostrando días y horas disponibles para una cita médica.
-•	 Registrar, editar y eliminar citas médicas.
-•	Confirmar, cancelar y reprogramar citas.
-•	Enviar recordatorios automáticos a los pacientes.
-•	Llevar un control y seguimiento del estado de las citas (asistidas, no asistidas, canceladas y reprogramadas).
-•	Definir roles básicos del sistema para pacientes y personal del consultorio (doctor y asistente).
-•	Organizar los horarios disponibles y la duración estimada de las consultas.
+Servidor Local: XAMPP.
 
+Arquitectura: Diseño de tres capas (Presentación, Lógica y Datos).
 
-Que NO hace.
+/AGENDAVITAL
+├── /config             # Conexión a la BD (db.php)
+├── /docs               # Documentación y criterios de aceptación
+├── /public/assets      # Recursos estáticos
+│   ├── /css            # Estilos por roles (doctor, asistente, paciente)
+│   ├── /img            # Logotipos e imágenes del sistema
+│   └── /js             # Lógica de validación frontend
+├── /src                # Lógica del sistema
+│   ├── /appointments   # Gestión de citas (agendar, cancelar, finalizar)
+│   ├── /auth           # Scripts de validación y logout
+│   └── /patients       # Registro de pacientes
+├── /views              # Interfaces de usuario
+│   ├── /auth           # Pantalla de Login
+│   └── /roles          # Vistas específicas según rol
+└── index.php           # Punto de entrada principal
 
-•	Gestión de expedientes clínicos electrónicos.
-•	Diagnóstico médico o atención clínica.
-•	Sistemas de emergencias médicas.
-•	Plataformas hospitalarias complejas.
-•	Facturación médica avanzada o sistemas financieros completos.
-•	Redes sociales médicas o comunicación médica especializada.
-•	Sustitución del criterio profesional del médico.
-•	Aplicación móvil y de escritorio. 
+Instrucciones de Instalación (Paso a Paso)
+1. Preparación de archivos
+Descarga e instala XAMPP. https://www.apachefriends.org/download.html
 
-## Tipo de sistema: 
-Página Web.
-No requiere instalación por lo que resulta más accesible y práctica para un consultorio médico porque permite que los pacientes puedan agendar, reagendar o cancelar citas en cualquier momento y desde cualquier dispositivo con acceso a internet, sin necesidad de llamar al consultorio.
+Clona este repositorio y coloca la carpeta dentro de: C:\xampp\htdocs\agenda-vital.
 
-## Equipo y roles:
-Los Angeles de Ruth – Rol Sprint 1
-Coordinador -Jesahias
-Analista -Javier
-Diseñador -Fernando
-Tester/QA -Jonathan
-Desarrollador -Jorge
+2. Configuración de Puertos (XAMPP)
+Para que el sistema funcione correctamente, debemos mover los servicios al puerto 3307.
 
-## Estado del proyecto:
-Sprint 1 - Análisis
+A. Configurar MySQL:
 
+En el Panel de Control de XAMPP en la fila de MySQL, haz clic en Config > my.ini.
+
+Busca la línea port=3306 y cámbiala por port=3307 (aparece dos veces).
+
+Guarda y cierra.
+
+B. Configurar phpMyAdmin (Acceso a la BD):
+
+En la fila de Apache, haz clic en el botón Config y selecciona phpMyAdmin (config.inc.php).
+
+Busca el bloque de comentarios que dice: /* Bind to the localhost ipv4 address and tcp */.
+
+Justo debajo de ese comentario, pega o edita la siguiente línea:
+$cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
+
+Asegúrate de que la línea quede antes del cierre de los servidores para que el gestor reconozca el puerto correctamente.
+
+3. Importar la Base de Datos
+Inicia Apache y MySQL en el panel de XAMPP.
+
+Accede a http://localhost/phpmyadmin/.
+
+Crea una base de datos nueva llamada agenda_vital.
+
+Abre el archivo scripts_sql que se encuentra dentro de la carpeta /database del proyecto.
+
+Copia todo el contenido del archivo.
+
+En phpMyAdmin, selecciona la base de datos agenda_vital, ve a la pestaña SQL, pega el código y presiona Continuar para ejecutarlo.
+
+Usuarios de Prueba
+
+Rol,Usuario,Contraseña
+Doctor,doctor@nava.com,Nava2026*
+Asistente,asistente@vital.com,Asistente2026*
+Paciente,paciente1@vital.com,Nava2026*
+
+Notas y Limitaciones
+Estado del Proyecto: Actualmente nos encontramos en el Sprint 4.
+
+Ajuste de Alcance: Debido a limitaciones de tiempo, se han eliminado funciones como el cálculo de la tasa de inasistencia.
+
+Notificaciones: El sistema de correos automáticos no está implementado en esta versión.
