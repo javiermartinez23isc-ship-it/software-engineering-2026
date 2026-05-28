@@ -85,4 +85,49 @@ INSERT INTO `usuario` (`id_usuario`, `id_tipo_usuario`, `nombre`, `apellido_pate
 (5, 3, 'JONATHAN ALFREDO', NULL, NULL, NULL, 'paciente3@vital.com', 'Nava2026*', '2026-04-26 20:58:46'),
 (6, 3, 'hola', 'holaaa', NULL, NULL, 'paciente4@vital.com', 'Nava2026*', '2026-04-26 21:14:47'),
 (7, 3, 'Maria contreras', 'lopez', NULL, NULL, 'paciente5@vital.com', 'Nava2026*', '2026-04-29 01:04:55');
+
+-- Ejecutar en la base de datos agenda_vital
+CREATE TABLE `historial_medico` (
+  `id_historial` int(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) NOT NULL, -- ID del paciente
+  `fecha_consulta` date NOT NULL,
+  `motivo` varchar(255) NOT NULL,
+  `diagnostico` text NOT NULL,
+  `tratamiento` text NOT NULL,
+  `fecha_registro` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_historial`),
+  KEY `id_usuario` (`id_usuario`),
+  CONSTRAINT `historial_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Insertar un dato de prueba para el paciente con ID 5 (Por ejemplo)
+INSERT INTO `historial_medico` (`id_usuario`, `fecha_consulta`, `motivo`, `diagnostico`, `tratamiento`) VALUES
+(5, '2026-05-15', 'Dolor de cabeza y fiebre', 'Migraña aguda', 'Paracetamol 500mg cada 8 horas');
+```
+
+
+## Migración: Agregar foto_perfil a usuario
+
+```sql
+-- Ejecutar en la base de datos agenda_vital
+ALTER TABLE `usuario` ADD COLUMN `foto_perfil` varchar(255) DEFAULT NULL AFTER `fecha_alta`;
+```
+
+
+## Tabla: configuracion_consultorio
+
+```sql
+-- Ejecutar en la base de datos agenda_vital
+CREATE TABLE IF NOT EXISTS `configuracion_consultorio` (
+  `id_config` int(11) NOT NULL AUTO_INCREMENT,
+  `clave` varchar(100) NOT NULL,
+  `valor` text DEFAULT NULL,
+  PRIMARY KEY (`id_config`),
+  UNIQUE KEY `clave` (`clave`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Datos iniciales opcionales
+INSERT IGNORE INTO `configuracion_consultorio` (`clave`, `valor`) VALUES
+('nombre_consultorio', 'Consultorio Privado'),
+('logo_consultorio', NULL);
 ```

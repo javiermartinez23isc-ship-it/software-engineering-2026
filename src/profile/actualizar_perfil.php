@@ -1,0 +1,224 @@
+<?php
+// Procesador: Actualizar perfil de cualquier usuario (doctor, asistente, paciente)
+include_once(__DIR__ . '/../../config/db.php');
+session_start();
+
+// 1. Verificar sesión activa
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../../views/auth/login.php");
+    exit();
+}
+
+$id_usuario   = $_SESSION['usuario_id'];
+$tipo_usuario = $_SESSION['id_tipo_usuario'];
+
+// Determinar ruta de regreso según rol
+$rutas = [
+    1 => '../../views/roles/doctor.php',
+    2 => '../../views/roles/asistente.php',
+    3 => '../../views/roles/paciente.php'
+];
+$ruta_regreso = $rutas[$tipo_usuario] ?? '../../views/auth/login.php';
+
+// 2. Verificar que sea POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: $ruta_regreso");
+    exit();
+}
+
+// ── Función de validación alfabética ──────────────────────────────────────────
+function soloLetras($valor) {
+    // Permite letras (incluyendo acentos y ñ), espacios y guiones
+    return preg_match('/^[\p{L}\s\-]+$/u', $valor);
+}
+
+// ── Función de validación telefónica ─────────────────────────────────────────
+function soloTelefono($valor) {
+    // Permite dígitos, espacios, +, - y paréntesis
+    return empty($valor) || preg_match('/^[\d\s\+\-\(\)]{7,15}$/', $valor);
+}
+
+// 3. Sanitizar y leer campos según el rol
+// El paciente (tipo 3) solo puede cambiar teléfono y contraseña
+// Doctor (1) y asistente (2) pueden cambiar todos sus datos
+
+$nueva_password  = trim($_POST['nueva_password'] ?? '');
+$confirmar_pass  = trim($_POST['confirmar_password'] ?? '');
+$telefono        = mysqli_real_escape_string($conexion, trim($_POST['telefono'] ?? ''));
+
+if ($tipo_usuario == 3) {
+    // ── PACIENTE: solo teléfono y contraseña ──────────────────────────────────
+    // Validar teléfono
+    if (!soloTelefono($telefono)) {
+        echo "<script>alert('Error: El teléfono solo puede contener números, espacios, +, - y paréntesis.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Manejar cambio de contraseña
+    $pass_sql = '';
+    if (!empty($nueva_password)) {
+        if ($nueva_password !== $confirmar_pass) {
+            echo "<script>alert('Error: Las contraseñas no coinciden.'); window.history.back();</script>";
+            exit();
+        }
+        if (strlen($nueva_password) < 6) {
+            echo "<script>alert('Error: La contraseña debe tener al menos 6 caracteres.'); window.history.back();</script>";
+            exit();
+        }
+        $pass_escapada = mysqli_real_escape_string($conexion, $nueva_password);
+        $pass_sql = ", contrasena_hash = '$pass_escapada'";
+    }
+
+    // Manejar foto de perfil
+    $foto_sql = procesarFoto($conexion, $id_usuario);
+    if ($foto_sql === false) exit(); // Error ya mostrado dentro de la función
+
+    $sql = "UPDATE usuario SET telefono = '$telefono' $foto_sql $pass_sql WHERE id_usuario = '$id_usuario'";
+
+} else {
+    // ── DOCTOR / ASISTENTE: todos los campos ─────────────────────────────────
+    $nombre           = trim($_POST['nombre'] ?? '');
+    $apellido_paterno = trim($_POST['apellido_paterno'] ?? '');
+    $apellido_materno = trim($_POST['apellido_materno'] ?? '');
+    $correo           = trim($_POST['correo'] ?? '');
+
+    // Validar campos obligatorios
+    if (empty($nombre) || empty($correo)) {
+        echo "<script>alert('Error: El nombre y el correo son obligatorios.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Validar que nombre y apellidos sean solo letras
+    if (!soloLetras($nombre)) {
+        echo "<script>alert('Error: El nombre solo puede contener letras.'); window.history.back();</script>";
+        exit();
+    }
+    if (!empty($apellido_paterno) && !soloLetras($apellido_paterno)) {
+        echo "<script>alert('Error: El apellido paterno solo puede contener letras.'); window.history.back();</script>";
+        exit();
+    }
+    if (!empty($apellido_materno) && !soloLetras($apellido_materno)) {
+        echo "<script>alert('Error: El apellido materno solo puede contener letras.'); window.history.back();</script>";
+        exit();
+    }
+    if (!soloTelefono($telefono)) {
+        echo "<script>alert('Error: El teléfono solo puede contener números, espacios, +, - y paréntesis.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Sanitizar para SQL
+    $nombre           = mysqli_real_escape_string($conexion, $nombre);
+    $apellido_paterno = mysqli_real_escape_string($conexion, $apellido_paterno);
+    $apellido_materno = mysqli_real_escape_string($conexion, $apellido_materno);
+    $correo           = mysqli_real_escape_string($conexion, $correo);
+
+    // Verificar que el correo no esté en uso por otro usuario
+    $check_correo = mysqli_query($conexion, "SELECT id_usuario FROM usuario WHERE correo = '$correo' AND id_usuario != '$id_usuario'");
+    if (mysqli_num_rows($check_correo) > 0) {
+        echo "<script>alert('Error: Este correo ya está registrado por otro usuario.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Manejar cambio de contraseña (opcional)
+    $pass_sql = '';
+    if (!empty($nueva_password)) {
+        if ($nueva_password !== $confirmar_pass) {
+            echo "<script>alert('Error: Las contraseñas no coinciden.'); window.history.back();</script>";
+            exit();
+        }
+        if (strlen($nueva_password) < 6) {
+            echo "<script>alert('Error: La contraseña debe tener al menos 6 caracteres.'); window.history.back();</script>";
+            exit();
+        }
+        $pass_escapada = mysqli_real_escape_string($conexion, $nueva_password);
+        $pass_sql = ", contrasena_hash = '$pass_escapada'";
+    }
+
+    // Manejar foto de perfil
+    $foto_sql = procesarFoto($conexion, $id_usuario);
+    if ($foto_sql === false) exit();
+
+    $sql = "UPDATE usuario SET 
+                nombre = '$nombre',
+                apellido_paterno = '$apellido_paterno',
+                apellido_materno = '$apellido_materno',
+                telefono = '$telefono',
+                correo = '$correo'
+                $foto_sql
+                $pass_sql
+            WHERE id_usuario = '$id_usuario'";
+}
+
+// 4. Ejecutar UPDATE
+if (mysqli_query($conexion, $sql)) {
+    if ($tipo_usuario != 3) {
+        $_SESSION['nombre'] = $_POST['nombre'] ?? $_SESSION['nombre'];
+    }
+    header("Location: $ruta_regreso?perfil=ok");
+    exit();
+} else {
+    $error = addslashes(mysqli_error($conexion));
+    echo "<script>alert('Error al actualizar el perfil: $error'); window.history.back();</script>";
+}
+
+// ── Función auxiliar: procesar subida de foto ─────────────────────────────────
+function procesarFoto($conexion, $id_usuario) {
+    // Verificar si la columna foto_perfil existe
+    $col_check = mysqli_query($conexion, "SHOW COLUMNS FROM usuario LIKE 'foto_perfil'");
+    if (!$col_check || mysqli_num_rows($col_check) === 0) {
+        return ''; // Columna no existe aún, ignorar foto
+    }
+
+    if (!isset($_FILES['foto_perfil']) || $_FILES['foto_perfil']['error'] === UPLOAD_ERR_NO_FILE) {
+        return ''; // No se subió ninguna foto, no es error
+    }
+
+    if ($_FILES['foto_perfil']['error'] !== UPLOAD_ERR_OK) {
+        echo "<script>alert('Error al recibir la imagen. Código: " . $_FILES['foto_perfil']['error'] . "'); window.history.back();</script>";
+        return false;
+    }
+
+    $archivo    = $_FILES['foto_perfil'];
+    $ext        = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
+    $permitidos = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+    if (!in_array($ext, $permitidos)) {
+        echo "<script>alert('Error: Solo se permiten imágenes JPG, PNG, GIF o WEBP.'); window.history.back();</script>";
+        return false;
+    }
+
+    if ($archivo['size'] > 2 * 1024 * 1024) {
+        echo "<script>alert('Error: La imagen no debe superar 2 MB.'); window.history.back();</script>";
+        return false;
+    }
+
+    // Verificar que sea realmente una imagen
+    $info = @getimagesize($archivo['tmp_name']);
+    if ($info === false) {
+        echo "<script>alert('Error: El archivo no es una imagen válida.'); window.history.back();</script>";
+        return false;
+    }
+
+    $nombre_archivo = 'perfil_' . $id_usuario . '_' . time() . '.' . $ext;
+    $directorio     = __DIR__ . '/../../public/assets/img/perfiles/';
+
+    if (!is_dir($directorio)) {
+        mkdir($directorio, 0755, true);
+    }
+
+    if (!is_writable($directorio)) {
+        echo "<script>alert('Error: El servidor no tiene permisos para guardar imágenes. Contacta al administrador.'); window.history.back();</script>";
+        return false;
+    }
+
+    $ruta_destino = $directorio . $nombre_archivo;
+
+    if (move_uploaded_file($archivo['tmp_name'], $ruta_destino)) {
+        $ruta_bd = mysqli_real_escape_string($conexion, 'assets/img/perfiles/' . $nombre_archivo);
+        return ", foto_perfil = '$ruta_bd'";
+    } else {
+        echo "<script>alert('Error al guardar la imagen en el servidor. Verifica los permisos de la carpeta public/assets/img/perfiles/'); window.history.back();</script>";
+        return false;
+    }
+}
+?>

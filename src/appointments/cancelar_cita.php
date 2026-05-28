@@ -19,8 +19,9 @@ if (isset($_GET['id']) && isset($_GET['horario'])) {
         $destino = '../../views/roles/paciente.php';
     }
 
-    // 1. Liberar el horario en la tabla 'horario' (Usando puerto 3307)
-    $sql_h = "UPDATE horario SET estado = 'disponible' WHERE id_horario = '$id_horario'";
+    // 1. Liberar el horario en la tabla 'horario'
+    // Solo restaurar si el horario tenía disponible=1 (no fue bloqueado por el doctor)
+    $sql_h = "UPDATE horario SET estado = 'disponible' WHERE id_horario = '$id_horario' AND disponible = 1";
     mysqli_query($conexion, $sql_h);
 
     // 2. Borrar la cita de la tabla 'cita'

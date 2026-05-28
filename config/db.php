@@ -1,4 +1,7 @@
 <?php
+// Zona horaria de México (Centro: UTC-6 / UTC-5 en verano)
+date_default_timezone_set('America/Mexico_City');
+
 $host = "127.0.0.1";
 $port = "3307"; // El puerto que salvó el proyecto
 $user = "root";
