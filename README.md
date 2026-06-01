@@ -29,11 +29,15 @@ Agenda Vital es una plataforma web para consultorios independientes que automati
 ## Instalación paso a paso
 
 ### 1. Colocar los archivos
-
-Copia la carpeta completa `AgendaVital` (incluyendo `vendor/`) dentro de:
+- Cortar la carpeta completa `AgendaVital` (incluyendo `vendor/`)
+- Ingresa en tu explorador de archivos al apartado de `Disco local (C:)`
+- Buscar la carpeta `xampp`, después la carpeta `htdocs`
+- La ruta final debe ser:
 ```
 C:\xampp\htdocs
 ```
+-Pegar la carpeta `AgendaVital` previamente cortada dentro de la 
+dirección actual
 
 La estructura debe verse así:
 ```
@@ -76,8 +80,10 @@ $cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
 
 ### 3. Configurar la zona horaria en PHP
 
-1. Abre `C:\xampp\php\php.ini` con el bloc de notas
-2. Busca `date.timezone` y cámbiala a:
+1. Abre **XAMPP Control Panel** como administrador
+2. En la fila **Apache** dar clic en el apartado **Config**
+3. Buscar la opción **PHP (php.ini)** y entrar como bloc de notas
+4. Busca `date.timezone` y cámbia a:
 ```ini
 date.timezone=America/Mexico_City
 ```
@@ -86,26 +92,32 @@ date.timezone=America/Mexico_City
 extension=zip
 ```
 4. Guarda el archivo
-5. **Reinicia Apache y MySQL** desde el panel XAMPP
 
 ### 4. Crear la base de datos
 
-1. Inicia Apache y MySQL desde el panel XAMPP
-2. Abre `http://localhost/phpmyadmin/`
+1. Inicia Apache y MySQL desde el panel XAMPP 
+2. En la fila MySQL selecciona **Admin** que abre la siguiente direción: `http://localhost/phpmyadmin/`
 3. Crea una base de datos llamada `agenda_vital` con cotejamiento `utf8mb4_general_ci`
 4. Selecciona `agenda_vital` en el panel izquierdo
 5. Ve a la pestaña **SQL**
-6. Sigue la siguiente ruta: `C:\XAMPP\htdocs\AgendaVital\database`
-7. Copia todo el contenido y pégalo en el apartado de SQL en phpMyAdmin
-8. Haz clic en **Continuar**
+6. Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
+7. Dentro de la ruta abre el archivo `base de datos` como bloc de notas
+8. Copia todo el contenido y pégalo en el apartado de **SQL** en phpMyAdmin
+9. Haz clic en **Continuar**
 
 ### 5. Acceder al sistema
 
-Abre el navegador y ve a:
+Abre el navegador y dirígete a:
 ```
-http://localhost/AgendaVital/
+http://localhost/AgendaVital/views/auth/login.php
 ```
+En dado caso de tener problemas con el puerto **Apache** usar esta dirección:
+```
+http://localhost:8080/AgendaVital/views/auth/login.php
+```
+
 ---
+
 
 ## Usuarios de acceso
 
@@ -116,8 +128,8 @@ http://localhost/AgendaVital/
 | Paciente | paciente1@vital.com | Nava2026* |
 | Paciente | paciente2@vital.com | Nava2026* |
 
-Podras ingresar con los usarios predeterminados, editar el nombre del doctor y asistente.
-También agregar logo a tu consultorio y su nombre en la configuración del consultorio en el panel de doctor.
+- Podras ingresar con los usarios predeterminados, editar el nombre del doctor y asistente.
+- También agregar logo a tu consultorio y su nombre en la configuración del consultorio en el panel de doctor.
 
 ---
 
