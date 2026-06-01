@@ -1,183 +1,236 @@
 # Agenda Vital
 ### Sistema de Gestión de Citas Médicas
 
-Agenda Vital es una plataforma web orientada a consultorios independientes para automatizar la programación de consultas médicas. Centraliza la información clínica y administrativa, facilitando la interacción entre médicos, asistentes y pacientes para optimizar el flujo de trabajo operativo.
+Agenda Vital es una plataforma web para consultorios independientes que automatiza la programación de consultas médicas. Centraliza citas, historial médico y administración de pacientes con tres roles: Doctor, Asistente y Paciente.
 
 ---
 
-## Tecnologías Utilizadas
+## Tecnologías
 
 | Capa | Tecnología |
 |---|---|
-| Backend | PHP (scripts dinámicos, sin framework) |
+| Backend | PHP 8.x (sin framework) |
 | Base de Datos | MySQL — puerto `3307` |
-| Frontend | HTML5, CSS3, JavaScript (vanilla) |
-| Servidor Local | XAMPP (Apache + MySQL) |
-| Arquitectura | Tres capas: Presentación · Lógica · Datos |
+| Frontend | HTML5, CSS3, JavaScript vanilla |
+| Servidor local | XAMPP (Apache + MySQL) |
+| Correo | PHPMailer 7.x + Gmail SMTP |
+
+> **PHPMailer ya está incluido** en la carpeta `vendor/` del proyecto. No necesitas instalar Composer ni PHPMailer en el equipo destino — solo copia la carpeta completa `AgendaVital` incluyendo `vendor/`.
 
 ---
 
-## Estructura del Proyecto
+## Requisitos previos
 
-```text
-/AGENDAVITAL
-├── /config                  # Conexión a la BD (db.php)
-├── /database                # Scripts SQL de creación e inserción
-├── /docs                    # Documentación, criterios de aceptación y reportes
-├── /public/assets
-│   ├── /css                 # Estilos por rol (doctor, asistente, paciente, login)
-│   ├── /img                 # Logotipos, fotos de perfil e imágenes del sistema
-│   └── /js                  # Lógica de validación y comportamiento frontend
-├── /src                     # Lógica del sistema (backend)
-│   ├── /appointments        # Agendar, cancelar, reprogramar y finalizar citas
-│   ├── /auth                # Login, logout y recuperación de contraseña
-│   ├── /consultorio         # Actualización de datos del consultorio
-│   ├── /historial           # Agregar, editar y eliminar registros del historial médico
-│   ├── /patients            # Registro de pacientes por el asistente
-│   ├── /profile             # Actualización de perfil y foto
-│   └── /schedule            # Gestión de horarios (bloqueo/desbloqueo por el doctor)
-├── /views
-│   ├── /auth                # Pantalla de Login
-│   └── /roles               # Vistas específicas por rol
-│       ├── doctor.php
-│       ├── asistente.php
-│       ├── paciente.php
-│       ├── historial.php
-│       └── registrar_historial_cita.php
-└── index.php                # Punto de entrada principal
+- [XAMPP](https://www.apachefriends.org/download.html) instalado
+- Cuenta de Gmail personal (no institucional) con **Verificación en 2 pasos** activa
+
+---
+
+## Instalación paso a paso
+
+### 1. Colocar los archivos
+
+Copia la carpeta completa `AgendaVital` (incluyendo `vendor/`) dentro de:
+```
+C:\xampp\htdocs\AgendaVital
 ```
 
----
+La estructura debe verse así:
+```
+C:\xampp\htdocs\AgendaVital\
+├── .kiro\
+├── backend\
+├── config\
+├── database\
+├── docs\
+├── fron\
+├── public\
+├── software-engineering-2026\
+├── src\
+├── vendor\              ← PHPMailer ya incluido aquí
+├── views\
+├── .env
+├── .env.example
+├── composer.json
+├── composer.lock
+└── README.md
+```
 
-## Funcionalidades Implementadas
+### 2. Configurar el puerto de MySQL en XAMPP
 
-### 🩺 Módulo Doctor
-- Visualización de la agenda semanal con calendario dinámico (semana actual + siguiente)
-- Bloqueo y desbloqueo de horarios específicos
-- Confirmación y finalización de citas
-- Acceso al historial médico de cualquier paciente
-- Registro de nuevas consultas en el historial
-- Edición y eliminación de registros del historial médico
-- Configuración de perfil: nombre, apellidos, teléfono, correo, foto y contraseña
-- Configuración del consultorio: nombre y logotipo
+Este proyecto usa el puerto **3307** en lugar del 3306 por defecto.
 
-### 🗂️ Módulo Asistente
-- Visualización de todas las citas activas con estado
-- Registro de nuevas citas para cualquier paciente
-- Cancelación de citas desde la agenda
-- Registro de nuevos pacientes con: nombre, apellido paterno, **apellido materno** (opcional), correo, teléfono y contraseña provisional
-- Acceso al historial médico de pacientes
-- Configuración de perfil personal
-
-### 👤 Módulo Paciente
-- Visualización de su cita activa con fecha, hora y estado
-- Agendado de citas mediante calendario interactivo
-- **Reprogramación de cita**: cancela la cita actual y permite seleccionar un nuevo horario en el mismo paso (el horario anterior queda bloqueado visualmente)
-- Cancelación de cita activa
-- Consulta de historial médico personal (solo lectura)
-- Configuración de perfil: teléfono, foto y contraseña
-
-### 🔐 Autenticación y Seguridad
-- Login con validación de rol (doctor, asistente, paciente)
-- Guards de sesión en todas las vistas y endpoints
-- Protección contra acceso directo a rutas por rol incorrecto
-- Contraseñas almacenadas como texto provisional (pendiente de migración a `password_hash`)
-- Entradas sanitizadas con `mysqli_real_escape_string` y validaciones con `preg_match`
-- Registro de pacientes con verificación de correo duplicado
-
----
-
-## Instalación Paso a Paso
-
-### 1. Preparar archivos
-1. Descarga e instala [XAMPP](https://www.apachefriends.org/download.html)
-2. Clona o descarga este repositorio
-3. Coloca la carpeta dentro de: `C:\xampp\htdocs\AgendaVital`
-
-### 2. Configurar puertos en XAMPP
-
-**MySQL — cambiar a puerto 3307:**
-1. En el Panel de XAMPP, fila MySQL → `Config` → `my.ini`
-2. Busca `port=3306` y cámbiala por `port=3307` (aparece dos veces)
+**Cambiar puerto en MySQL:**
+1. Panel XAMPP → fila MySQL → `Config` → `my.ini`
+2. Busca `port=3306` (aparece dos veces) y cámbiala a `port=3307`
 3. Guarda y cierra
 
-**phpMyAdmin — apuntar al nuevo puerto:**
-1. En la fila Apache → `Config` → `phpMyAdmin (config.inc.php)`
-2. Busca el bloque `/* Bind to the localhost ipv4 address and tcp */`
-3. Agrega o edita la línea:
-   ```php
-   $cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
-   ```
-
-### 3. Importar la base de datos
-1. Inicia Apache y MySQL desde el panel de XAMPP
-2. Accede a `http://localhost/phpmyadmin/`
-3. Crea una base de datos llamada `agenda_vital`
-4. Abre el archivo `/database/scripts_sql.md`
-5. Copia el contenido SQL, ve a la pestaña **SQL** en phpMyAdmin, pégalo y ejecuta
-
-### 4. Ejecutar migraciones adicionales
-Después del script principal, ejecuta también estos bloques que están al final de `scripts_sql.md`:
-
-```sql
--- Agregar columna foto_perfil
-ALTER TABLE `usuario` ADD COLUMN `foto_perfil` varchar(255) DEFAULT NULL AFTER `fecha_alta`;
-
--- Crear tabla de configuración del consultorio
-CREATE TABLE IF NOT EXISTS `configuracion_consultorio` ( ... );
+**Apuntar phpMyAdmin al nuevo puerto:**
+1. Panel XAMPP → fila Apache → `Config` → `phpMyAdmin (config.inc.php)`
+2. Busca el bloque `/* Bind to the localhost ipv4 address */`
+3. Agrega o edita esta línea:
+```php
+$cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
 ```
+4. Guarda y cierra
+
+### 3. Configurar la zona horaria en PHP
+
+1. Abre `C:\xampp\php\php.ini` con el bloc de notas
+2. Busca `date.timezone` y cámbiala a:
+```ini
+date.timezone=America/Mexico_City
+```
+3. Busca `;extension=zip` y quítale el punto y coma:
+```ini
+extension=zip
+```
+4. Guarda el archivo
+5. **Reinicia Apache y MySQL** desde el panel XAMPP
+
+### 4. Crear la base de datos
+
+1. Inicia Apache y MySQL desde el panel XAMPP
+2. Abre `http://localhost/phpmyadmin/`
+3. Crea una base de datos llamada `agenda_vital` con cotejamiento `utf8mb4_general_ci`
+4. Selecciona `agenda_vital` en el panel izquierdo
+5. Ve a la pestaña **SQL**
+6. Sigue la siguiente ruta: `C:\XAMPP\htdocs\AgendaVital\database`
+7. Copia todo el contenido y pégalo en el apartado de SQL en phpMyAdmin
+8. Haz clic en **Continuar**
 
 ### 5. Acceder al sistema
-Abre tu navegador y ve a:
+
+Abre el navegador y ve a:
 ```
 http://localhost/AgendaVital/
 ```
-
 ---
 
-## Usuarios de Prueba
+## Usuarios de acceso
 
-| Rol | Usuario | Contraseña |
+| Rol | Correo | Contraseña |
 |---|---|---|
 | Doctor | doctor@nava.com | Nava2026* |
 | Asistente | asistente@vital.com | Asistente2026* |
 | Paciente | paciente1@vital.com | Nava2026* |
 | Paciente | paciente2@vital.com | Nava2026* |
 
+Podras ingresar con los usarios predeterminados, editar el nombre del doctor y asistente.
+También agregar logo a tu consultorio y su nombre en la configuración del consultorio en el panel de doctor.
+
 ---
 
-## Estado del Proyecto
+## Funcionalidades implementadas
 
-El sistema se encuentra en fase de desarrollo activo. Las funcionalidades principales están implementadas y operativas.
-
-### ✅ Implementado
-- Sistema de autenticación por roles
-- Calendario dinámico de horarios (semana actual + siguiente)
-- Gestión completa de citas: agendar, cancelar, reprogramar, confirmar y finalizar
-- Historial médico: agregar, editar y eliminar registros
-- Registro de pacientes con apellido materno
-- Configuración de perfil con foto
+### 🩺 Doctor
+- Agenda de citas con estado: ⏳ Pendiente / ✅ Confirmada / 🔄 Reprogramada
+- Finalizar cita → registro **obligatorio** de historial médico (no se puede omitir)
+- Marcar inasistencia
+- Bloquear y desbloquear horarios específicos
+- Historial médico de pacientes: visualizar, editar y eliminar registros
+- Configuración de perfil (nombre, apellidos, teléfono, correo, foto, contraseña)
 - Configuración del consultorio (nombre y logo)
-- Diseño responsive (mobile-first)
 
-### 🔄 Pendiente / Mejoras futuras
-- Migración de contraseñas a `password_hash` / `password_verify`
-- Sistema de recordatorios automáticos por correo
-- Recuperación de contraseña funcional vía email
-- Cálculo de tasa de inasistencia
-- Paginación en tablas con muchos registros
-- Aplicación móvil nativa
+### 🗂️ Asistente
+- Ver agenda de citas activas con estado
+- Registrar citas para pacientes (valida que no tenga cita activa previa)
+- Cancelar citas
+- Registrar nuevos pacientes con contraseña provisional
+- Historial médico de pacientes (solo lectura)
+- Configuración de perfil
+
+### 👤 Paciente
+- Ver su cita activa con fecha, hora y estado
+- Agendar cita mediante calendario interactivo
+  - Horarios y días pasados bloqueados automáticamente
+  - Horas del día actual que ya pasaron también bloqueadas
+- Cancelar cita
+- Reprogramar cita (máximo **2 veces por día**)
+- **Primer inicio de sesión fuerza cambio de contraseña provisional**
+- Historial médico personal (solo lectura)
+- Configuración de perfil: teléfono, foto y contraseña
+- Campanita 🔔 de recordatorio con contador de tiempo real
+
+### 🔔 Recordatorios automáticos por correo
+- Al agendar una cita se crea automáticamente un recordatorio para **1 hora antes**
+- El correo se envía al paciente con fecha, hora y estado de la cita
+- Incluye botón **"Confirmar mi cita"** que funciona sin iniciar sesión (token único)
+- El asunto indica cuándo es la cita: "hoy", "mañana" o "en X días"
+- El envío se dispara automáticamente cuando cualquier usuario carga una página del sistema
+
+### 🔐 Seguridad y automatismos
+- Guards de sesión y rol en todas las rutas
+- Cancelar cita cambia estado a Cancelada(3) — nunca borra el registro
+- Auto-marcado de "No asistió"(5) para citas pasadas sin atender al cargar cualquier página
+- Zona horaria de MySQL sincronizada con PHP en cada conexión
 
 ---
 
-## Equipo de Desarrollo
+## Estructura del proyecto
 
-**Los Ángeles de Ruth** — Universidad / Ingeniería de Software 2026
+```
+AgendaVital\
+├── .kiro\
+│   └── specs\
+├── backend\
+│   ├── config\
+│   ├── database\
+│   └── server\
+├── config\
+│   └── db.php
+├── database\
+│   ├── models_assistant.sql
+│   ├── models_doctor.sql
+│   ├── models_home.sql
+│   ├── models_patient.sql
+│   ├── base de datos.txt
+│   └── scripts_sql.md
+├── docs\
+│   ├── design\
+│   ├── reports\
+│   ├── requirements\
+│   ├── user_manual\
+│   └── criterios_aceptacion.md
+├── fron\
+│   ├── assistant\
+│   ├── doctor\
+│   ├── home\
+│   └── patient\
+├── public\
+│   └── assets\
+├── src\
+│   ├── api\
+│   ├── appointments\
+│   ├── auth\
+│   ├── consultorio\
+│   ├── historial\
+│   ├── notifications\
+│   ├── patients\
+│   ├── profile\
+│   └── schedule\
+├── vendor\
+│   ├── composer\
+│   ├── phpmailer\
+│   └── autoload.php
+├── views\
+│   ├── auth\
+│   └── roles\
+├── .env
+├── .env.example
+├── composer.json
+├── composer.lock
+└── README.md
+```
+
+## Equipo de desarrollo
+
+**Los Navitas** — Instituto Tecnológico Superior de San Pedro de Las Colonias / Ingeniería de Software 2026
 
 | Nombre | Rol |
 |---|---|
-| Jesahias | Coordinador |
-| Javier | Analista |
-| Fernando | Diseñador |
-| Jonathan | Tester / QA |
-| Jorge | Desarrollador |
+| Jesahias | Analista |
+| Javier | Dev Líder |
+| Fernando | Tester / QA |
+| Jonathan | Diseñador |
+| Jorge | Coordinador |
