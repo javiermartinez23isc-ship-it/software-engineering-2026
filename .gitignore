@@ -16,9 +16,6 @@ error_log
 # public/assets/img/perfiles/
 # public/assets/img/logos/
 
-# Dependencias (si en el futuro se usa Composer o npm)
-vendor/
-node_modules/
 
 # Caché y temporales de PHP
 *.cache
