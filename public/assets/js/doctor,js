@@ -1,0 +1,32 @@
+/* doctor.js - COMPORTAMIENTO COMPLETO */
+function mostrar(id) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.seccion').forEach(s => {
+        s.classList.remove('activa');
+    });
+
+    // Quitar estado activo de los enlaces del sidebar
+    document.querySelectorAll('.sidebar a').forEach(a => {
+        a.classList.remove('active');
+    });
+
+    // Mostrar la sección seleccionada
+    const vista = document.getElementById('vista-' + id);
+    if (vista) {
+        vista.classList.add('activa');
+    }
+
+    // Activar el botón del menú correspondiente
+    const menu = document.getElementById('menu-' + id);
+    if (menu) {
+        menu.classList.add('active');
+    }
+}
+
+// Al cargar la página, abrir la sección correcta según parámetros de URL
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('perfil') === 'ok') {
+        mostrar('configuracion');
+    }
+});

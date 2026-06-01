@@ -1,0 +1,327 @@
+/* ============================================================
+   doctor.css  —  Desktop-first, responsive
+   ============================================================ */
+:root {
+    --doctor-main: #059669;
+    --nava-cian:   #00bcd4;
+    --dark-blue:   #1a237e;
+    --bg:          #f4f7f9;
+    --gray-nav:    #999;
+    --sidebar-w:   240px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--dark-blue);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ── Layout shell ────────────────────────────────────────── */
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ── Navbar ─────────────────────────────────────────────── */
+.navbar-vital {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gray-nav);
+    padding: 6px 14px;
+    margin: 8px 10px 5px;
+    border-radius: 50px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.12);
+    position: sticky;
+    top: 8px;
+    z-index: 100;
+    gap: 8px;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nav-right { flex-shrink: 0; }
+
+.logo-container {
+    background: #fff;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+}
+.logo-img { width: 90%; height: 90%; object-fit: contain; }
+
+.brand-name       { font-weight: 600; font-size: 0.88rem; color: #333; white-space: nowrap; }
+.logout-link      { text-decoration: none; color: #333; font-size: 0.78rem; font-weight: 500; white-space: nowrap; }
+.user-profile-nav { font-size: 0.78rem; font-weight: 600; color: #333; white-space: nowrap; }
+
+/* Botón hamburguesa — oculto en escritorio */
+.hamburger-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: none;
+}
+
+/* ── Content wrapper: sidebar + main en fila ─────────────── */
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+}
+
+/* ── Sidebar (escritorio: columna lateral fija) ──────────── */
+.sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0 20px;
+    flex-shrink: 0;
+    min-height: calc(100vh - 60px);
+    /* En escritorio NO es fixed ni drawer */
+    position: relative;
+    z-index: auto;
+}
+
+.profile-circle {
+    width: 76px;
+    height: 76px;
+    background: #eceff1;
+    border-radius: 50%;
+    border: 3px solid var(--doctor-main);
+    margin-bottom: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+}
+.profile-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+.consultorio-clickable {
+    cursor: pointer;
+    transition: box-shadow .2s, transform .15s;
+}
+.consultorio-clickable:hover {
+    box-shadow: 0 0 0 4px rgba(5,150,105,.25);
+    transform: scale(1.04);
+}
+
+.sidebar h3 { font-size: 1rem; margin-bottom: 2px; text-align: center; padding: 0 10px; }
+.sidebar p  { font-size: 0.78rem; color: #64748b; margin-bottom: 12px; text-align: center; padding: 0 10px; }
+
+.sidebar a {
+    display: block;
+    width: 88%;
+    padding: 10px 14px;
+    margin: 3px 0;
+    text-decoration: none;
+    color: var(--dark-blue);
+    font-weight: 700;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    transition: background .18s;
+}
+.sidebar a.active             { background: var(--doctor-main); color: #fff; }
+.sidebar a:hover:not(.active) { background: #ecfdf5; }
+
+/* Overlay oscuro — solo en móvil */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 98;
+}
+
+/* ── Área de contenido principal ─────────────────────────── */
+.main {
+    flex: 1;
+    padding: 28px;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+.seccion        { display: none; }
+.seccion.activa { display: block; }
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card {
+    background: #fff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.06);
+    margin-bottom: 18px;
+}
+
+/* ── Tipografía ──────────────────────────────────────────── */
+h1 { font-size: 1.6rem; margin-bottom: 14px; }
+h3 { font-size: 1.1rem; margin-bottom: 10px; }
+
+/* ── Tablas ──────────────────────────────────────────────── */
+.table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 420px;
+}
+
+th {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 2px solid #eee;
+    color: #90a4ae;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    word-break: break-word;
+}
+
+/* ── Botones de acción ───────────────────────────────────── */
+.btn-atender, .btn-cancelar {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-atender { background: var(--doctor-main); color: #fff; }
+.btn-cancelar { background: #fee2e2; color: #ef4444; margin-left: 4px; }
+
+.td-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer-vital {
+    background: var(--gray-nav);
+    height: 26px;
+    border-top: 1px solid #555;
+    flex-shrink: 0;
+}
+
+/* ── Formularios ─────────────────────────────────────────── */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.form-group { margin-bottom: 14px; }
+.form-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #475569;
+    margin-bottom: 5px;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+/* ============================================================
+   MÓVIL  ≤ 680px  — sidebar como drawer lateral
+   ============================================================ */
+@media (max-width: 680px) {
+
+    /* Mostrar botón hamburguesa */
+    .hamburger-btn { display: block; }
+
+    /* Navbar más compacta */
+    .navbar-vital { margin: 6px 8px 4px; padding: 6px 10px; top: 6px; }
+    .brand-name   { font-size: 0.82rem; }
+
+    /* Ocultar texto del doctor en navbar, dejar solo ícono */
+    .user-profile-nav { font-size: 0; }
+    .user-profile-nav::before { content: '👤'; font-size: 1rem; }
+
+    /* Sidebar: drawer oculto por defecto */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: min(75vw, 260px);
+        min-width: unset;
+        padding: 60px 0 20px;
+        z-index: 99;
+        transform: translateX(-110%);
+        transition: transform .28s ease;
+        overflow-y: auto;
+        box-shadow: 4px 0 18px rgba(0,0,0,.18);
+        min-height: unset;
+    }
+
+    /* Drawer abierto */
+    .sidebar.open         { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+
+    /* Contenido ocupa todo el ancho */
+    .main { padding: 12px 10px; }
+
+    /* Cards */
+    .card { padding: 12px 10px; border-radius: 10px; }
+
+    /* Tipografía escalable */
+    h1 { font-size: clamp(1.1rem, 4vw, 1.4rem); }
+    h3 { font-size: clamp(0.9rem, 3vw, 1rem); }
+
+    /* Tablas */
+    table { min-width: 380px; font-size: 0.8rem; }
+
+    /* Botones en columna */
+    .td-actions { flex-direction: column; align-items: stretch; }
+    .td-actions a,
+    .td-actions button { display: block; text-align: center; margin: 2px 0; }
+
+    /* Grids de formulario → 1 columna */
+    .form-grid { grid-template-columns: 1fr; }
+
+    /* Footer oculto en móvil */
+    .footer-vital { display: none; }
+}

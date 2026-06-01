@@ -1,8 +1,12 @@
--- ============================================================
--- Agenda Vital — Script de instalación completo
--- Ejecutar en phpMyAdmin sobre la base de datos: agenda_vital
--- ============================================================
+# Scripts SQL — Agenda Vital
 
+Ejecuta los bloques **en orden** en phpMyAdmin sobre la base de datos `agenda_vital`.
+
+---
+
+## 1. Tablas principales
+
+```sql
 CREATE TABLE `tipo_usuario` (
   `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_tipo` varchar(25) NOT NULL,
@@ -108,15 +112,19 @@ CREATE TABLE `reprogramacion` (
   CONSTRAINT `reprogramacion_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
   CONSTRAINT `reprogramacion_ibfk_2` FOREIGN KEY (`id_cita_nueva`) REFERENCES `cita` (`id_cita`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
 
--- ── Datos iniciales ──────────────────────────────────────────
+---
 
+## 2. Datos iniciales
+
+```sql
 INSERT INTO `tipo_usuario` (`id_tipo_usuario`, `nombre_tipo`) VALUES
 (1, 'Doctor'),
 (2, 'Asistente'),
 (3, 'Paciente');
 
--- IMPORTANTE: No modificar los IDs — el código depende de ellos
+-- Estados de cita (NO modificar los IDs — el código depende de ellos)
 INSERT INTO `estado_cita` (`id_estado_cita`, `estado`) VALUES
 (1, 'Pendiente'),
 (2, 'Finalizada'),
@@ -127,12 +135,29 @@ INSERT INTO `estado_cita` (`id_estado_cita`, `estado`) VALUES
 INSERT IGNORE INTO `configuracion_consultorio` (`clave`, `valor`) VALUES
 ('nombre_consultorio', 'Consultorio Privado'),
 ('logo_consultorio', NULL);
+```
 
--- ── Usuarios de prueba (contraseñas en texto plano — solo desarrollo) ──
+---
 
+## 3. Usuarios de prueba
+
+> ⚠️ Contraseñas en texto plano — solo para entorno de desarrollo.
+
+```sql
 INSERT INTO `usuario` (`id_usuario`, `id_tipo_usuario`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `correo`, `contrasena_hash`, `contrasena_provisional`) VALUES
-(1, 1, 'Jesús Fernando',    'Rodríguez', 'Nava',     '8710000000', 'doctor@nava.com',     'Nava2026*',      0),
-(2, 2, 'Jesahias Fernando', 'Juarez',    'Palacios', '8711112233', 'asistente@vital.com', 'Asistente2026*', 0),
-(3, 3, 'Jorge Humberto',    'Esquivel',  'Cuellar',  '8714445566', 'paciente1@vital.com', 'Nava2026*',      0),
-(4, 3, 'Jesús Javier',      'Martínez',  'Hernández','8717778899', 'paciente2@vital.com', 'Nava2026*',      0);
- 
+(1, 1, 'Jesús Fernando', 'Rodríguez', 'Nava',     '8710000000', 'doctor@nava.com',     'Nava2026*',       0),
+(2, 2, 'Jesahias Fernando', 'Juarez', 'Palacios', '8711112233', 'asistente@vital.com', 'Asistente2026*',  0),
+(3, 3, 'Jorge Humberto', 'Esquivel', 'Cuellar',   '8714445566', 'paciente1@vital.com', 'Nava2026*',       0),
+(4, 3, 'Jesús Javier',  'Martínez', 'Hernández',  '8717778899', 'paciente2@vital.com', 'Nava2026*',       0);
+```
+
+---
+
+## Usuarios de acceso
+
+| Rol       | Correo                | Contraseña     |
+|-----------|-----------------------|----------------|
+| Doctor    | doctor@nava.com       | Nava2026*      |
+| Asistente | asistente@vital.com   | Asistente2026* |
+| Paciente  | paciente1@vital.com   | Nava2026*      |
+| Paciente  | paciente2@vital.com   | Nava2026*      |

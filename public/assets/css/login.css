@@ -1,0 +1,164 @@
+/* ============================================================
+   login.css  —  Mobile-first responsive
+   ============================================================ */
+:root {
+    --cian:       #00bcd4;
+    --green-text: #2e7d32;
+    --green-dark: #1b5e20;
+    --text-muted: #475569;
+    --bg:         #fafafa;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+}
+
+/* ── Contenedor ──────────────────────────────────────────── */
+.login-container {
+    display: flex;
+    width: 100%;
+    max-width: 860px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,.14);
+}
+
+/* ── Panel imagen ────────────────────────────────────────── */
+.brand-section {
+    flex: 1;
+    background-image: url('../../assets/img/imagen_agendaVital.jpeg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 200px;
+}
+
+/* ── Panel formulario ────────────────────────────────────── */
+.form-section {
+    flex: 1;
+    padding: clamp(28px, 5vw, 50px) clamp(22px, 5vw, 44px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ── Encabezado ──────────────────────────────────────────── */
+.brand-text-container { margin-bottom: 22px; }
+
+.brand-text-container h1 {
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    color: var(--green-text);
+    line-height: 1.2;
+}
+.brand-text-container h2 {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+.brand-text-container p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ── Formulario ──────────────────────────────────────────── */
+.login-title    { color: #608e24; font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+.login-subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4; }
+
+.input-group { margin-bottom: 16px; }
+
+label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.92rem;
+}
+input:focus {
+    outline: none;
+    border-color: var(--cian);
+    box-shadow: 0 0 0 3px rgba(0,188,212,.1);
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 0.82rem;
+    color: var(--green-text);
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 18px;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 13px;
+    background: var(--green-text);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background .25s;
+}
+.btn-login:hover { background: var(--green-dark); }
+
+.fade-view { animation: fadeIn .35s ease; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   MÓVIL  ≤ 640px  — imagen como banner superior
+   ============================================================ */
+@media (max-width: 640px) {
+    body { padding: 12px; align-items: flex-start; padding-top: 24px; }
+
+    .login-container {
+        flex-direction: column;
+        max-width: 420px;
+        margin: 0 auto;
+        border-radius: 14px;
+    }
+
+    .brand-section {
+        flex: none;
+        height: 130px;
+    }
+
+    .form-section {
+        flex: none;
+        padding: 24px 20px 30px;
+    }
+}
+
+/* ── Pantallas muy pequeñas ≤ 380px ─────────────────────── */
+@media (max-width: 380px) {
+    .brand-section { height: 90px; }
+    .form-section  { padding: 18px 14px 24px; }
+    .brand-text-container h1 { font-size: 1.15rem; }
+}
