@@ -22,3 +22,11 @@ function mostrar(id) {
         menu.classList.add('active');
     }
 }
+
+// Al cargar la página, abrir la sección correcta según parámetros de URL
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('perfil') === 'ok') {
+        mostrar('configuracion');
+    }
+});
