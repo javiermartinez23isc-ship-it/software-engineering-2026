@@ -23,7 +23,6 @@ Agenda Vital es una plataforma web para consultorios independientes que automati
 
 - [XAMPP](https://www.apachefriends.org/download.html) instalado
 - Cuenta de Gmail personal (no institucional) con **Verificación en 2 pasos** activa
-- Al descargar desde GitHub renombrar la carpeta como: AgendaVital
 
 ---
 

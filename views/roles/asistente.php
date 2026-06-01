@@ -22,14 +22,17 @@ $id_asis = $_SESSION['usuario_id'];
 $nombre_asistente = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Usuario";
 $hoy = date('Y-m-d');
 
-// 1. Citas registradas (Se añade u.id_usuario a la consulta)
+// 1. Citas registradas — solo activas (1,4)
 $query_citas = "SELECT c.id_cita, c.id_horario, u.id_usuario, u.nombre as paciente, u.apellido_paterno, h.fecha, h.hora_inicio, e.estado as nombre_estado 
                 FROM cita c 
                 JOIN usuario u ON c.id_usuario = u.id_usuario 
                 JOIN horario h ON c.id_horario = h.id_horario 
                 JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
                 WHERE c.id_estado_cita IN (1, 4)
-                ORDER BY h.fecha ASC, h.hora_inicio ASC";
+                AND h.fecha >= CURDATE()
+                ORDER BY 
+                    FIELD(c.id_estado_cita, 1, 4),
+                    h.fecha ASC, h.hora_inicio ASC";
 $res_citas = mysqli_query($conexion, $query_citas);
 
 // 2. Pacientes para el select
@@ -74,13 +77,17 @@ if ($res_ocu_asis) {
 }
 
 function renderCeldaAsistente($fecha, $hora, $hoy, $slots) {
+    // Bloquear días pasados
     if ($fecha < $hoy) {
         return '<td class="cell-locked" title="Día pasado">—</td>';
+    }
+    // Bloquear horas pasadas del día actual
+    if ($fecha === $hoy && $hora <= date('H:i:s')) {
+        return '<td class="cell-locked" title="Hora pasada">—</td>';
     }
     $key = $fecha . '|' . $hora;
     if (isset($slots[$key])) {
         $s = $slots[$key];
-        // Bloqueado por doctor (disponible=0) o con cita activa (estado=ocupado)
         if ($s['estado'] === 'ocupado' || (int)($s['disponible'] ?? 1) === 0) {
             return '<td class="cell-locked" onclick="mostrarAlerta()" title="No disponible">🔒</td>';
         }
@@ -329,23 +336,36 @@ if ($res_conf_asis) {
                     <form method="POST" action="../../src/profile/actualizar_perfil.php" enctype="multipart/form-data">
                         <label>Nombre(s) *</label>
                         <input type="text" name="nombre" required
+                               pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]+"
+                               title="Solo letras, espacios y guiones"
+                               oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                value="<?php echo htmlspecialchars($datos_perfil_asis['nombre'] ?? ''); ?>">
 
                         <div class="form-grid-2">
                             <div>
                                 <label>Apellido Paterno</label>
                                 <input type="text" name="apellido_paterno"
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
+                                       title="Solo letras, espacios y guiones"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                        value="<?php echo htmlspecialchars($datos_perfil_asis['apellido_paterno'] ?? ''); ?>">
                             </div>
                             <div>
                                 <label>Apellido Materno</label>
                                 <input type="text" name="apellido_materno"
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
+                                       title="Solo letras, espacios y guiones"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                        value="<?php echo htmlspecialchars($datos_perfil_asis['apellido_materno'] ?? ''); ?>">
                             </div>
                         </div>
 
                         <label>Teléfono</label>
                         <input type="tel" name="telefono"
+                               pattern="[0-9]{7,15}"
+                               title="Solo números, entre 7 y 15 dígitos"
+                               oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                               maxlength="15"
                                value="<?php echo htmlspecialchars($datos_perfil_asis['telefono'] ?? ''); ?>">
 
                         <label>Correo Electrónico *</label>
@@ -356,6 +376,12 @@ if ($res_conf_asis) {
                         <input type="file" name="foto_perfil" accept="image/*"
                                style="padding:8px; background:white;">
                         <small style="color:#64748b; display:block; margin-top:4px;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
+                        <?php if (!empty($datos_perfil_asis['foto_perfil'])): ?>
+                        <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
+                            <input type="checkbox" name="quitar_foto" value="1">
+                            🗑️ Quitar foto de perfil actual
+                        </label>
+                        <?php endif; ?>
 
                         <hr class="form-hr">
                         <label>Nueva Contraseña <span style="font-weight:normal; font-size:0.85rem;">(dejar en blanco para no cambiar)</span></label>

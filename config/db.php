@@ -3,15 +3,30 @@
 date_default_timezone_set('America/Mexico_City');
 
 $host = "127.0.0.1";
-$port = "3307"; // El puerto que salvó el proyecto
+$port = "3307";
 $user = "root";
 $pass = "";
 $db   = "agenda_vital";
 
-// Conexión específica para el puerto 3307
 $conexion = mysqli_connect($host, $user, $pass, $db, $port);
 
 if (!$conexion) {
     die("Error de conexión: " . mysqli_connect_error());
 }
+
+// Sincronizar zona horaria de MySQL con PHP
+$offset = date('P'); // Ej: "-06:00"
+mysqli_query($conexion, "SET time_zone = '$offset'");
+
+// Auto-marcar como "No asistió"(5) las citas Pendientes o Confirmadas cuya hora ya pasó
+mysqli_query($conexion,
+    "UPDATE cita c
+     JOIN horario h ON c.id_horario = h.id_horario
+     SET c.id_estado_cita = 5
+     WHERE c.id_estado_cita IN (1, 4)
+       AND CONCAT(h.fecha, ' ', h.hora_inicio) < NOW()");
+
+// Enviar recordatorios por correo cuya hora de envío ya llegó
+require_once __DIR__ . '/../src/notifications/enviar_recordatorios.php';
+procesarRecordatorios($conexion);
 ?>

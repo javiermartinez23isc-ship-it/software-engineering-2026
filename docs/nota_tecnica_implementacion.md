@@ -352,3 +352,5 @@ Donde `id_usuario = 3` corresponde al paciente de prueba `paciente1@vital.com`.
 - Adjuntar archivos o imágenes a un registro de historial (resultados de laboratorio, radiografías)
 
 ---
+
+*Documento generado para uso interno del equipo de desarrollo. Última actualización: 28 de Mayo de 2026.*

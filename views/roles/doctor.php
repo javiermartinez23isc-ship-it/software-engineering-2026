@@ -23,22 +23,26 @@ header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 $id_user = $_SESSION['usuario_id'];
 $nombre_usuario = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Doctor";
 
-// 2. Consulta de citas AJUSTADA PARA PRUEBAS (Se añadió c.id_usuario)
+// 2. Consulta de citas — solo activas (1,4), con flag si fue reprogramada
 $query_citas = "SELECT 
                     c.id_cita, 
                     c.id_usuario, 
                     u.nombre AS paciente, 
                     h.fecha,
                     h.hora_inicio, 
-                    e.estado AS nombre_estado 
+                    e.estado AS nombre_estado,
+                    (SELECT COUNT(*) FROM reprogramacion r WHERE r.id_cita_nueva = c.id_cita) AS fue_reprogramada
                 FROM cita c 
                 INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
                 INNER JOIN horario h ON c.id_horario = h.id_horario 
                 INNER JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 4) 
-                ORDER BY h.fecha ASC, h.hora_inicio ASC";
+                WHERE c.id_estado_cita IN (1, 4)
+                AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                ORDER BY 
+                    FIELD(c.id_estado_cita, 1, 4),
+                    h.fecha ASC, h.hora_inicio ASC";
 
-$res_citas = mysqli_query($conexion, $query_citas);
+$res_citas   = mysqli_query($conexion, $query_citas);
 $error_mysql = (!$res_citas) ? mysqli_error($conexion) : "";
 
 // 3. Consulta de pacientes para la sección Historial
@@ -173,43 +177,67 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                             <div class="table-wrap">
                             <table>
                                 <colgroup>
-                                    <col style="width: 30%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 30%;">
+                                    <col style="width: 25%;">
+                                    <col style="width: 18%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 17%;">
+                                    <col style="width: 25%;">
                                 </colgroup>
                                 <thead>
                                     <tr>
                                         <th>Paciente</th>
                                         <th>Fecha</th>
                                         <th>Hora</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <?php if (mysqli_num_rows($res_citas) > 0): ?>
-                                        <?php while($cita = mysqli_fetch_assoc($res_citas)): ?>
+                                <tbody id="tbody-agenda">
+                                    <?php
+                                    function pillEstiloDoctor($estado) {
+                                        switch (strtolower(trim($estado))) {
+                                            case 'confirmada':     return ['bg'=>'#dcfce7','color'=>'#166534','border'=>'#bbf7d0','icono'=>'✅'];
+                                            case 'cancelada':      return ['bg'=>'#fee2e2','color'=>'#991b1b','border'=>'#fecaca','icono'=>'❌'];
+                                            case 'reprogramada':   return ['bg'=>'#ede9fe','color'=>'#5b21b6','border'=>'#c4b5fd','icono'=>'🔄'];
+                                            default:               return ['bg'=>'#fef9c3','color'=>'#92400e','border'=>'#fde68a','icono'=>'⏳'];
+                                        }
+                                    }
+                                    if (mysqli_num_rows($res_citas) > 0): ?>
+                                        <?php while($cita = mysqli_fetch_assoc($res_citas)):
+                                            // Si fue reprogramada, mostrar ese estado en lugar del original
+                                            $estado_mostrar = ((int)$cita['fue_reprogramada'] > 0 && strtolower($cita['nombre_estado']) === 'pendiente')
+                                                ? 'Reprogramada'
+                                                : $cita['nombre_estado'];
+                                            $p = pillEstiloDoctor($estado_mostrar); ?>
                                         <tr>
-                                            <td><strong><?php echo $cita['paciente']; ?></strong></td>
+                                            <td><strong><?php echo htmlspecialchars($cita['paciente']); ?></strong></td>
                                             <td><?php echo $cita['fecha']; ?></td>
                                             <td><?php echo date("g:i a", strtotime($cita['hora_inicio'])); ?></td>
                                             <td>
+                                                <span style="display:inline-block;padding:3px 10px;border-radius:18px;font-size:0.75rem;font-weight:700;white-space:nowrap;background:<?php echo $p['bg']; ?>;color:<?php echo $p['color']; ?>;border:1px solid <?php echo $p['border']; ?>;">
+                                                    <?php echo $p['icono'] . ' ' . htmlspecialchars($estado_mostrar); ?>
+                                                </span>
+                                            </td>
+                                            <td>
                                                 <div class="td-actions">
-                                                    <a href="historial.php?id=<?php echo $cita['id_usuario']; ?>" style="background: #0ea5e9; color: white; padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold;">Historial</a>
-                                                    <a href="../../src/appointments/finalizar_cita.php?id=<?php echo $cita['id_cita']; ?>&status=2" class="btn-atender">Finalizar</a>
-                                                    <a href="../../src/appointments/finalizar_cita.php?id=<?php echo $cita['id_cita']; ?>&status=5" class="btn-cancelar" onclick="return confirm('¿Marcar como inasistencia?')">Faltó</a>
+                                                    <a href="historial.php?id=<?php echo $cita['id_usuario']; ?>" style="background:#0ea5e9;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:0.78rem;font-weight:bold;">📋 Historial</a>
+                                                    <?php if (strtolower(trim($cita['nombre_estado'])) !== 'cancelada'): ?>
+                                                        <a href="../../src/appointments/finalizar_cita.php?id=<?php echo $cita['id_cita']; ?>&status=2" class="btn-atender">✔ Finalizar</a>
+                                                        <a href="../../src/appointments/finalizar_cita.php?id=<?php echo $cita['id_cita']; ?>&status=5" class="btn-cancelar" onclick="return confirm('¿Marcar como inasistencia?')">✖ Faltó</a>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>
                                         <?php endwhile; ?>
                                     <?php else: ?>
-                                        <tr><td colspan="4" style="text-align:center; padding:30px; color:#64748b;">No hay citas pendientes en el sistema.</td></tr>
+                                        <tr><td colspan="5" style="text-align:center;padding:30px;color:#64748b;">No hay citas en el sistema.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                             </div>
                         <?php endif; ?>
                     </div>
+
                 </div>
 
                 <div id="vista-historial" class="seccion">
@@ -397,28 +425,37 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Nombre(s) *</label>
                                     <input type="text" name="nombre" required
-                                           pattern="[\p{L}\s\-]+" title="Solo letras, espacios y guiones"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]+"
+                                           title="Solo letras, espacios y guiones"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['nombre'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Paterno</label>
                                     <input type="text" name="apellido_paterno"
-                                           pattern="[\p{L}\s\-]*" title="Solo letras, espacios y guiones"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
+                                           title="Solo letras, espacios y guiones"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['apellido_paterno'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Materno</label>
                                     <input type="text" name="apellido_materno"
-                                           pattern="[\p{L}\s\-]*" title="Solo letras, espacios y guiones"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
+                                           title="Solo letras, espacios y guiones"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['apellido_materno'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Teléfono</label>
                                     <input type="tel" name="telefono"
-                                           pattern="[\d\s\+\-\(\)]{7,15}" title="Solo números, espacios, +, - y paréntesis"
+                                           pattern="[0-9]{7,15}"
+                                           title="Solo números, entre 7 y 15 dígitos"
+                                           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                           maxlength="15"
                                            value="<?php echo htmlspecialchars($datos_perfil['telefono'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
@@ -436,6 +473,12 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                 <input type="file" name="foto_perfil" accept="image/*"
                                        style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; background:white;">
                                 <small style="color:#64748b;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
+                                <?php if (!empty($datos_perfil['foto_perfil'])): ?>
+                                <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
+                                    <input type="checkbox" name="quitar_foto" value="1">
+                                    🗑️ Quitar foto de perfil actual
+                                </label>
+                                <?php endif; ?>
                             </div>
 
                             <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">

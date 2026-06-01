@@ -25,6 +25,18 @@ if ($fecha_slot < date('Y-m-d')) {
     exit();
 }
 
+// Verificar si el paciente ya tiene una cita activa futura
+$check = mysqli_query($conexion,
+    "SELECT c.id_cita FROM cita c
+     JOIN horario h ON c.id_horario = h.id_horario
+     WHERE c.id_usuario = '$id_paciente'
+       AND c.id_estado_cita IN (1, 4)
+       AND h.fecha >= CURDATE()");
+if (mysqli_num_rows($check) > 0) {
+    echo "<script>alert('Este paciente ya tiene una cita activa pendiente o confirmada. Cancélala primero antes de registrar una nueva.'); window.history.back();</script>";
+    exit();
+}
+
 // Buscar o crear el registro en horario
 if ($id_horario > 0) {
     $res_h = mysqli_query($conexion, "SELECT id_horario, estado, disponible FROM horario WHERE id_horario = '$id_horario'");

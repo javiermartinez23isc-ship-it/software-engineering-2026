@@ -125,34 +125,6 @@ $hoy = date('Y-m-d');
         <p><strong>Teléfono:</strong> <?php echo !empty($datos_paciente['telefono']) ? htmlspecialchars($datos_paciente['telefono']) : 'No registrado'; ?></p>
     </div>
 
-    <?php if ($es_doctor): ?>
-    <!-- ── Formulario: nueva consulta ── -->
-    <div class="form-nueva-consulta">
-        <h3>➕ Agregar Nueva Consulta</h3>
-        <form method="POST" action="../../src/historial/agregar_historial.php">
-            <input type="hidden" name="id_paciente" value="<?php echo $id_paciente; ?>">
-            <div class="form-group">
-                <label>Fecha de Consulta</label>
-                <input type="date" name="fecha_consulta"
-                       max="<?php echo $hoy; ?>" value="<?php echo $hoy; ?>" required>
-            </div>
-            <div class="form-group">
-                <label>Motivo de Consulta</label>
-                <input type="text" name="motivo" maxlength="255" placeholder="Ej: Dolor de cabeza, fiebre..." required>
-            </div>
-            <div class="form-group">
-                <label>Diagnóstico</label>
-                <textarea name="diagnostico" placeholder="Diagnóstico del médico..." required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Tratamiento</label>
-                <textarea name="tratamiento" placeholder="Tratamiento indicado..." required></textarea>
-            </div>
-            <button type="submit" class="btn-guardar">💾 Guardar Consulta</button>
-        </form>
-    </div>
-    <?php endif; ?>
-
     <!-- ── Tabla de registros ── -->
     <h3 style="margin-bottom:14px; color:#1a237e;">Registro de Consultas</h3>
 

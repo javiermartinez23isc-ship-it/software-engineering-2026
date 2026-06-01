@@ -70,11 +70,22 @@ if ($tipo_usuario == 3) {
     }
 
     // Manejar foto de perfil
-    $foto_sql = procesarFoto($conexion, $id_usuario);
-    if ($foto_sql === false) exit(); // Error ya mostrado dentro de la función
+    $quitar_foto = isset($_POST['quitar_foto']) && $_POST['quitar_foto'] === '1';
+    if ($quitar_foto) {
+        // Borrar archivo físico si existe
+        $res_foto = mysqli_query($conexion, "SELECT foto_perfil FROM usuario WHERE id_usuario = '$id_usuario'");
+        $row_foto = mysqli_fetch_assoc($res_foto);
+        if (!empty($row_foto['foto_perfil'])) {
+            $ruta_fisica = __DIR__ . '/../../public/' . $row_foto['foto_perfil'];
+            if (file_exists($ruta_fisica)) @unlink($ruta_fisica);
+        }
+        $foto_sql = ", foto_perfil = NULL";
+    } else {
+        $foto_sql = procesarFoto($conexion, $id_usuario);
+        if ($foto_sql === false) exit();
+    }
 
     $sql = "UPDATE usuario SET telefono = '$telefono' $foto_sql $pass_sql WHERE id_usuario = '$id_usuario'";
-
 } else {
     // ── DOCTOR / ASISTENTE: todos los campos ─────────────────────────────────
     $nombre           = trim($_POST['nombre'] ?? '');
@@ -135,8 +146,19 @@ if ($tipo_usuario == 3) {
     }
 
     // Manejar foto de perfil
-    $foto_sql = procesarFoto($conexion, $id_usuario);
-    if ($foto_sql === false) exit();
+    $quitar_foto = isset($_POST['quitar_foto']) && $_POST['quitar_foto'] === '1';
+    if ($quitar_foto) {
+        $res_foto = mysqli_query($conexion, "SELECT foto_perfil FROM usuario WHERE id_usuario = '$id_usuario'");
+        $row_foto = mysqli_fetch_assoc($res_foto);
+        if (!empty($row_foto['foto_perfil'])) {
+            $ruta_fisica = __DIR__ . '/../../public/' . $row_foto['foto_perfil'];
+            if (file_exists($ruta_fisica)) @unlink($ruta_fisica);
+        }
+        $foto_sql = ", foto_perfil = NULL";
+    } else {
+        $foto_sql = procesarFoto($conexion, $id_usuario);
+        if ($foto_sql === false) exit();
+    }
 
     $sql = "UPDATE usuario SET 
                 nombre = '$nombre',

@@ -79,7 +79,15 @@ $sql = "INSERT INTO cita (id_usuario, id_horario, id_estado_cita, fecha_registro
         VALUES ('$id_usuario', '$id_horario', 1, NOW())";
 
 if (mysqli_query($conexion, $sql)) {
+    $id_cita_nueva = (int)mysqli_insert_id($conexion);
     mysqli_query($conexion, "UPDATE horario SET estado = 'ocupado' WHERE id_horario = '$id_horario'");
+
+    // Crear recordatorio: 1 hora antes de la cita
+    $fecha_envio = date('Y-m-d H:i:s', strtotime($fecha_slot . ' ' . $hora_slot) - 3600);
+    mysqli_query($conexion,
+        "INSERT INTO recordatorio (id_cita, fecha_envio, enviado)
+         VALUES ('$id_cita_nueva', '$fecha_envio', 0)");
+
     echo "<script>alert('¡Cita agendada con éxito!'); window.location.href='$redireccion';</script>";
 } else {
     echo "<script>alert('Error al agendar: " . addslashes(mysqli_error($conexion)) . "'); window.location.href='$redireccion';</script>";

@@ -76,20 +76,22 @@ if ($res_ocupados) {
  * - Disponible → verde, clickeable (guarda fecha+hora como data)
  */
 function renderCeldaPaciente($fecha, $hora, $hoy, $slots_bd) {
+    // Bloquear días pasados
     if ($fecha < $hoy) {
         return '<td class="cell-locked" title="Día pasado">—</td>';
+    }
+    // Bloquear horas pasadas del día actual
+    if ($fecha === $hoy && $hora <= date('H:i:s')) {
+        return '<td class="cell-locked" title="Hora pasada">—</td>';
     }
     $key = $fecha . '|' . $hora;
     if (isset($slots_bd[$key])) {
         $slot = $slots_bd[$key];
-        // Bloqueado por doctor (disponible=0) o con cita activa (estado=ocupado)
         if ($slot['estado'] === 'ocupado' || (int)$slot['disponible'] === 0) {
             return '<td class="cell-locked" title="No disponible">🔒</td>';
         }
-        // Existe en BD y está disponible → usar su id_horario
         return '<td class="cell-free" data-id="' . $slot['id'] . '" data-fecha="' . $fecha . '" data-hora="' . $hora . '" onclick="seleccionarCelda(this)"></td>';
     }
-    // No existe en BD → slot libre virtual (se creará al agendar)
     return '<td class="cell-free" data-id="" data-fecha="' . $fecha . '" data-hora="' . $hora . '" onclick="seleccionarCelda(this)"></td>';
 }
 $query_historial = "SELECT fecha_consulta, motivo, diagnostico, tratamiento 
@@ -366,6 +368,12 @@ function renderizarCelda($hora, $dia, $agenda) {
                             <input type="file" name="foto_perfil" accept="image/*"
                                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:10px; box-sizing:border-box; background:white; font-size:0.95rem;">
                             <small style="color:#64748b; display:block; margin-top:4px;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
+                            <?php if (!empty($datos_perfil_pac['foto_perfil'])): ?>
+                            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
+                                <input type="checkbox" name="quitar_foto" value="1">
+                                🗑️ Quitar foto de perfil actual
+                            </label>
+                            <?php endif; ?>
                         </div>
 
                         <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">

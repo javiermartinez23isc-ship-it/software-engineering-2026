@@ -81,9 +81,9 @@ $ap_materno_sql = ($ap_materno_esc !== '') ? "'$ap_materno_esc'" : 'NULL';
 $telefono_sql   = ($telefono_esc   !== '') ? "'$telefono_esc'"   : 'NULL';
 
 $query = "INSERT INTO usuario 
-            (id_tipo_usuario, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena_hash)
+            (id_tipo_usuario, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena_hash, contrasena_provisional)
           VALUES 
-            (3, '$nombre_esc', '$ap_paterno_esc', $ap_materno_sql, $telefono_sql, '$correo_esc', '$pass_provisional')";
+            (3, '$nombre_esc', '$ap_paterno_esc', $ap_materno_sql, $telefono_sql, '$correo_esc', '$pass_provisional', 1)";
 
 if (mysqli_query($conexion, $query)) {
     $correo_js = addslashes($correo);

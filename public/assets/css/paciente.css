@@ -203,9 +203,14 @@ h3 { font-size: clamp(0.88rem, 3vw, 1.05rem); margin-bottom: 10px; }
 
     .card { padding: 12px 10px; border-radius: 10px; }
 
-    /* Tablas con scroll */
+    /* Tablas con scroll — sin desbordamiento horizontal en la página */
     .schedule-table-wrapper { margin: 8px 0; }
     .schedule-table { min-width: 340px; }
+
+    /* Evitar scroll horizontal en toda la página */
+    .layout { overflow-x: hidden; }
+    .content-wrapper { overflow-x: hidden; }
+    .main { overflow-x: hidden; }
 
     /* Historial table */
     table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 340px; }
