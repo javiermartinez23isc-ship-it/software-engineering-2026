@@ -32,7 +32,7 @@ Agenda Vital es una plataforma web para consultorios independientes que automati
 
 Copia la carpeta completa `AgendaVital` (incluyendo `vendor/`) dentro de:
 ```
-C:\xampp\htdocs\AgendaVital
+C:\xampp\htdocs
 ```
 
 La estructura debe verse así:
