@@ -322,6 +322,10 @@ function renderizarCelda($hora, $dia, $agenda) {
                         <div style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:12px 15px; border-radius:10px; margin-bottom:20px;">
                             ✅ Perfil actualizado correctamente.
                         </div>
+                    <?php elseif (isset($_GET['perfil']) && $_GET['perfil'] === 'sin_cambios'): ?>
+                        <div style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:12px 15px; border-radius:10px; margin-bottom:20px;">
+                            ℹ️ No se realizaron cambios en el perfil.
+                        </div>
                     <?php endif; ?>
 
                     <!-- Foto de perfil actual -->
@@ -369,10 +373,12 @@ function renderizarCelda($hora, $dia, $agenda) {
                                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:10px; box-sizing:border-box; background:white; font-size:0.95rem;">
                             <small style="color:#64748b; display:block; margin-top:4px;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
                             <?php if (!empty($datos_perfil_pac['foto_perfil'])): ?>
-                            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
-                                <input type="checkbox" name="quitar_foto" value="1">
-                                🗑️ Quitar foto de perfil actual
-                            </label>
+                            <button type="submit" name="quitar_foto" value="1"
+                                    onclick="return confirm('¿Estás seguro de que deseas quitar tu foto de perfil?')"
+                                    style="margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:7px 14px; border-radius:8px; font-size:0.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .18s;"
+                                    onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                                🗑️ Quitar foto de perfil
+                            </button>
                             <?php endif; ?>
                         </div>
 

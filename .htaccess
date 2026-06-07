@@ -1,0 +1,5 @@
+# Deshabilitar listado de directorios
+Options -Indexes
+
+# Redirigir acceso a carpetas sin index al login
+DirectoryIndex index.php index.html

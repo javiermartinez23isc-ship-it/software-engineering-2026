@@ -72,7 +72,7 @@ if ($accion === 'cambiar') {
         exit();
     }
 
-    $pass_escaped = mysqli_real_escape_string($conexion, $nueva_pass);
+    $pass_hash    = mysqli_real_escape_string($conexion, password_hash($nueva_pass, PASSWORD_BCRYPT));
 
     // Verificar que el usuario exista
     $check = mysqli_query($conexion, "SELECT id_usuario FROM usuario WHERE id_usuario = '$id_usuario'");
@@ -81,9 +81,9 @@ if ($accion === 'cambiar') {
         exit();
     }
 
-    // Actualizar contraseña (texto plano, igual que el sistema actual)
+    // Actualizar contraseña con hash bcrypt
     $upd = mysqli_query($conexion,
-        "UPDATE usuario SET contrasena_hash = '$pass_escaped' WHERE id_usuario = '$id_usuario'");
+        "UPDATE usuario SET contrasena_hash = '$pass_hash' WHERE id_usuario = '$id_usuario'");
 
     if ($upd) {
         echo json_encode(['ok' => true, 'msg' => 'Contraseña actualizada correctamente.']);
