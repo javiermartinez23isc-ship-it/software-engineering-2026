@@ -21,9 +21,10 @@ Agenda Vital es una plataforma web para consultorios independientes que automati
 
 ## Requisitos previos
 
-- [XAMPP](https://www.apachefriends.org/download.html) instalado
-- visual studio code
-- Navegador web: Cualquier moderno
+- [XAMPP](https://www.apachefriends.org/download.html) instalado.
+- visual studio code.
+- tener instalado git. https://git-scm.com/install
+- Navegador web: Cualquier moderno.
 ---
 
 ## Instalación paso a paso
@@ -36,16 +37,18 @@ Todo el proceso se hace desde **Visual Studio Code**.
 
 1. copia el link del repositorio: https://github.com/javiermartinez23isc-ship-it/software-engineering-2026.git
 2. Abre **Visual Studio Code**
-33. Presiona **Ctrl + Shift + P** para abrir el panel de comandos
-4. Escribe `Git: Clone` y selecciónalo
-5. Pega la URL del repositorio anteriormente copiada.
-6. Cuando te pida seleccionar una carpeta de destino, navega a:
+3. En la pantalla principal selecciona la opcion "Clone Git Repository".
+4. Pega la URL del repositorio anteriormente copiada.
+5. Cuando te pida seleccionar una carpeta de destino, navega a:
 ```
 C:\xampp\htdocs\
 ```
 7. Haz clic en **Select as Repository Destination**
 8. Espera a que termine la descarga
 9. Cuando aparezca el mensaje **"Would you like to open the cloned repository?"**, haz clic en **Open**
+10. Una vez clonado cambiaras de la rama "main" a la rama "desarrollo", mira la esquina inferior izquierda de la ventana de VS Code, verás que aparece el nombre de la rama actual (main).
+12. Haz clic sobre ese nombre, se abrirá una lista en la parte superior de la pantalla con todas tus ramas locales y remotas.
+13. Selecciona la rama "desarrollo".
 
 ## 2. Configurar las credenciales de base de datos
 
@@ -68,7 +71,7 @@ $db   = "agenda_vital";
 5. Si tu MySQL de XAMPP tiene contraseña, escríbela entre las comillas. Si no tiene contraseña (instalación por defecto), déjala vacía:
 6. **Guarda** el archivo.
 
-> ℹ️ El usuario por defecto de XAMPP es `root` y normalmente no tiene contraseña. Solo cambia `$pass` si configuraste una contraseña diferente.
+>  El usuario por defecto de XAMPP es `root` y normalmente no tiene contraseña. Solo cambia `$pass` si configuraste una contraseña diferente.
 
 ### 3. Configurar el puerto de MySQL en XAMPP
 
