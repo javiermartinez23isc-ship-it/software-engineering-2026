@@ -49,6 +49,11 @@ C:\xampp\htdocs\
 10. Una vez clonado cambiaras de la rama "main" a la rama "desarrollo", mira la esquina inferior izquierda de la ventana de VS Code, verás que aparece el nombre de la rama actual (main).
 12. Haz clic sobre ese nombre, se abrirá una lista en la parte superior de la pantalla con todas tus ramas locales y remotas.
 13. Selecciona la rama "desarrollo".
+14. Una vez cambies de rama navega a:
+```
+C:\xampp\htdocs\
+```
+15. Dentro de htdocs encontraras una carpeta llamada software-engineering-2026, renombrala a "AgendaVital", especificamente ese nombre.
 
 ## 2. Configurar las credenciales de base de datos
 
