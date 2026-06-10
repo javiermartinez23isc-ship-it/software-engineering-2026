@@ -90,6 +90,7 @@ date.timezone=America/Mexico_City
 ```ini
 extension=zip
 ```
+En caso de no encontrarse, buscar ";extension=xsl" y  justo debajo de esta linea se debe agregar "extension=zip" sin comillas asi tal cual como se muestra.
 7. Guarda el archivo. cierra el archivo.
 8. vuelve a abrir XAMPP
 9. Inicia los servicios: 
