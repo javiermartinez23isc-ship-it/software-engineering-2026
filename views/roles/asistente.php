@@ -22,13 +22,13 @@ $id_asis = $_SESSION['usuario_id'];
 $nombre_asistente = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Usuario";
 $hoy = date('Y-m-d');
 
-// 1. Citas registradas — solo activas (1,2,4)
+// 1. Citas registradas — solo activas (1, 2, 4)
 $query_citas = "SELECT c.id_cita, c.id_horario, u.id_usuario, u.nombre as paciente, u.apellido_paterno, h.fecha, h.hora_inicio, e.estado as nombre_estado 
                 FROM cita c 
                 JOIN usuario u ON c.id_usuario = u.id_usuario 
                 JOIN horario h ON c.id_horario = h.id_horario 
                 JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 2, 4)
+                WHERE c.id_estado_cita IN (1, 2,  4)
                 AND h.fecha >= CURDATE()
                 ORDER BY 
                     FIELD(c.id_estado_cita, 1, 2, 4),

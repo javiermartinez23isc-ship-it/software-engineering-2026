@@ -36,7 +36,7 @@ $query_citas = "SELECT
                 INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
                 INNER JOIN horario h ON c.id_horario = h.id_horario 
                 INNER JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 2,4)
+                WHERE c.id_estado_cita IN (1, 2, 4)
                 AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 ORDER BY 
                     FIELD(c.id_estado_cita, 1, 2, 4),
@@ -204,7 +204,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                     }
                                     if (mysqli_num_rows($res_citas) > 0): ?>
                                         <?php while($cita = mysqli_fetch_assoc($res_citas)):
-                                            // Si fue reprogramada pero ya está Confirmada, mostrar Confirmada
+                                            // Si fue reprogramada, mostrar ese estado en lugar del original
                                             $estado_mostrar = ((int)$cita['fue_reprogramada'] > 0 && strtolower($cita['nombre_estado']) === 'pendiente')
                                                 ? 'Reprogramada'
                                                 : $cita['nombre_estado'];

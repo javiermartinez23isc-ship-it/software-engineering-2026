@@ -141,7 +141,7 @@ if ($tipo_usuario == 3) {
             echo "<script>alert('Error: La contraseña debe tener al menos 6 caracteres.'); window.history.back();</script>";
             exit();
         }
-        $pass_escapada = mysqli_real_escape_string($conexion, $nueva_password);
+        $pass_escapada = mysqli_real_escape_string($conexion, password_hash($nueva_password, PASSWORD_BCRYPT));
         $pass_sql = ", contrasena_hash = '$pass_escapada'";
     }
 

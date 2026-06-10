@@ -35,25 +35,30 @@ if ($accion === 'verificar') {
         exit();
     }
 
-    // Construir nombre completo normalizado (sin tildes, minúsculas) para comparar
-    $nombre_bd = strtolower(trim(
+    // Mapa de normalización de tildes
+    $map = ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ü'=>'u','ñ'=>'n',
+            'Á'=>'a','É'=>'e','Í'=>'i','Ó'=>'o','Ú'=>'u','Ü'=>'u','Ñ'=>'n'];
+
+    // Función helper para normalizar una cadena
+    $normalizar = function($str) use ($map) {
+        return preg_replace('/\s+/', ' ', strtr(strtolower(trim($str)), $map));
+    };
+
+    // Nombre completo desde BD
+    $nombre_bd_completo = $normalizar(
         $user['nombre'] . ' ' .
         ($user['apellido_paterno'] ?? '') . ' ' .
         ($user['apellido_materno'] ?? '')
-    ));
-    $nombre_input = strtolower(trim($nombre_raw));
+    );
 
-    // Normalizar tildes para comparación flexible
-    $map = ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ü'=>'u','ñ'=>'n',
-            'Á'=>'a','É'=>'e','Í'=>'i','Ó'=>'o','Ú'=>'u','Ü'=>'u','Ñ'=>'n'];
-    $nombre_bd_norm    = strtr($nombre_bd,    $map);
-    $nombre_input_norm = strtr($nombre_input, $map);
+    // Solo el nombre de pila desde BD
+    $nombre_bd_solo = $normalizar($user['nombre']);
 
-    // Eliminar espacios múltiples
-    $nombre_bd_norm    = preg_replace('/\s+/', ' ', $nombre_bd_norm);
-    $nombre_input_norm = preg_replace('/\s+/', ' ', $nombre_input_norm);
+    // Lo que escribió el usuario
+    $nombre_input_norm = $normalizar($nombre_raw);
 
-    if ($nombre_bd_norm !== $nombre_input_norm) {
+    // Aceptar si coincide con nombre completo O solo con el nombre de pila
+    if ($nombre_input_norm !== $nombre_bd_completo && $nombre_input_norm !== $nombre_bd_solo) {
         echo json_encode(['ok' => false, 'msg' => 'El nombre no coincide con el registrado para ese correo.']);
         exit();
     }

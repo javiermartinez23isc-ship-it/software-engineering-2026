@@ -73,8 +73,13 @@ function verificarIdentidad() {
             btn.textContent = 'Verificar Identidad';
             if (data.ok) {
                 document.getElementById('recovery-user-id').value = data.id_usuario;
+                // Limpiar campos de contraseña antes de mostrarlos
+                document.getElementById('newPassword').value     = '';
+                document.getElementById('confirmPassword').value = '';
                 document.getElementById('recovery-step1').style.display = 'none';
                 document.getElementById('recovery-step2').style.display = 'block';
+                // Forzar foco para que el navegador no rellene con autocompletado
+                setTimeout(() => document.getElementById('newPassword').focus(), 50);
             } else {
                 mostrarError('recovery-error', data.msg);
             }
