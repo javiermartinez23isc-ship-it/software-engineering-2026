@@ -22,16 +22,16 @@ $id_asis = $_SESSION['usuario_id'];
 $nombre_asistente = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Usuario";
 $hoy = date('Y-m-d');
 
-// 1. Citas registradas — solo activas (1,4)
+// 1. Citas registradas — solo activas (1, 2, 4)
 $query_citas = "SELECT c.id_cita, c.id_horario, u.id_usuario, u.nombre as paciente, u.apellido_paterno, h.fecha, h.hora_inicio, e.estado as nombre_estado 
                 FROM cita c 
                 JOIN usuario u ON c.id_usuario = u.id_usuario 
                 JOIN horario h ON c.id_horario = h.id_horario 
                 JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 4)
+                WHERE c.id_estado_cita IN (1, 2,  4)
                 AND h.fecha >= CURDATE()
                 ORDER BY 
-                    FIELD(c.id_estado_cita, 1, 4),
+                    FIELD(c.id_estado_cita, 1, 2, 4),
                     h.fecha ASC, h.hora_inicio ASC";
 $res_citas = mysqli_query($conexion, $query_citas);
 
@@ -276,18 +276,24 @@ if ($res_conf_asis) {
                     <form action="../../src/patients/registrar_paciente_asis.php" method="POST">
                         <label>Nombre(s):</label>
                         <input type="text" name="nombre" required placeholder="Ej. María"
-                               pattern="[\p{L}\s\-]+" title="Solo letras, espacios y guiones">
+                               pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+"
+                               title="Solo letras y espacios, sin números ni símbolos"
+                               oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')">
                         
                         <div class="form-grid-2">
                             <div>
                                 <label>Apellido Paterno:</label>
                                 <input type="text" name="ap_paterno" required placeholder="López"
-                                       pattern="[\p{L}\s\-]+" title="Solo letras, espacios y guiones">
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+"
+                                       title="Solo letras y espacios, sin números ni símbolos"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')">
                             </div>
                             <div>
                                 <label>Apellido Materno:</label>
                                 <input type="text" name="ap_materno" placeholder="García"
-                                       pattern="[\p{L}\s\-]+" title="Solo letras, espacios y guiones">
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                       title="Solo letras y espacios, sin números ni símbolos"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')">
                             </div>
                         </div>
 
@@ -299,7 +305,10 @@ if ($res_conf_asis) {
                             <div>
                                 <label>Teléfono:</label>
                                 <input type="tel" name="telefono" placeholder="Ej. 8711234567"
-                                       pattern="[\d\s\+\-\(\)]{7,15}" title="Solo números, espacios, +, - y paréntesis">
+                                       pattern="[0-9]{7,15}"
+                                       title="Solo números, entre 7 y 15 dígitos"
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                       maxlength="15">
                             </div>
                         </div>
                         
@@ -319,6 +328,10 @@ if ($res_conf_asis) {
                         <div style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
                             ✅ Perfil actualizado correctamente.
                         </div>
+                    <?php elseif (isset($_GET['perfil']) && $_GET['perfil'] === 'sin_cambios'): ?>
+                        <div style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
+                            ℹ️ No se realizaron cambios en el perfil.
+                        </div>
                     <?php endif; ?>
 
                     <!-- Foto de perfil actual -->
@@ -336,26 +349,26 @@ if ($res_conf_asis) {
                     <form method="POST" action="../../src/profile/actualizar_perfil.php" enctype="multipart/form-data">
                         <label>Nombre(s) *</label>
                         <input type="text" name="nombre" required
-                               pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]+"
-                               title="Solo letras, espacios y guiones"
-                               oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                               pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+"
+                               title="Solo letras y espacios, sin números ni símbolos"
+                               oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                value="<?php echo htmlspecialchars($datos_perfil_asis['nombre'] ?? ''); ?>">
 
                         <div class="form-grid-2">
                             <div>
                                 <label>Apellido Paterno</label>
                                 <input type="text" name="apellido_paterno"
-                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
-                                       title="Solo letras, espacios y guiones"
-                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                       title="Solo letras y espacios, sin números ni símbolos"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                        value="<?php echo htmlspecialchars($datos_perfil_asis['apellido_paterno'] ?? ''); ?>">
                             </div>
                             <div>
                                 <label>Apellido Materno</label>
                                 <input type="text" name="apellido_materno"
-                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
-                                       title="Solo letras, espacios y guiones"
-                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                                       pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                       title="Solo letras y espacios, sin números ni símbolos"
+                                       oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                        value="<?php echo htmlspecialchars($datos_perfil_asis['apellido_materno'] ?? ''); ?>">
                             </div>
                         </div>
@@ -370,6 +383,8 @@ if ($res_conf_asis) {
 
                         <label>Correo Electrónico *</label>
                         <input type="email" name="correo" required
+                               pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                               title="Ingresa un correo válido con formato nombre@dominio.ext"
                                value="<?php echo htmlspecialchars($datos_perfil_asis['correo'] ?? ''); ?>">
 
                         <label>Foto de Perfil</label>
@@ -377,10 +392,12 @@ if ($res_conf_asis) {
                                style="padding:8px; background:white;">
                         <small style="color:#64748b; display:block; margin-top:4px;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
                         <?php if (!empty($datos_perfil_asis['foto_perfil'])): ?>
-                        <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
-                            <input type="checkbox" name="quitar_foto" value="1">
-                            🗑️ Quitar foto de perfil actual
-                        </label>
+                        <button type="submit" name="quitar_foto" value="1"
+                                onclick="return confirm('¿Estás seguro de que deseas quitar tu foto de perfil?')"
+                                style="margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:7px 14px; border-radius:8px; font-size:0.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .18s;"
+                                onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                            🗑️ Quitar foto de perfil
+                        </button>
                         <?php endif; ?>
 
                         <hr class="form-hr">

@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($nueva === 'Nava2026*') {
         $error = 'Debes elegir una contraseña diferente a la provisional.';
     } else {
-        $pass_esc = mysqli_real_escape_string($conexion, $nueva);
+        $pass_esc = mysqli_real_escape_string($conexion, password_hash($nueva, PASSWORD_BCRYPT));
         $ok = mysqli_query($conexion,
             "UPDATE usuario
              SET contrasena_hash = '$pass_esc', contrasena_provisional = 0

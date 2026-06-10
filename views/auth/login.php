@@ -82,11 +82,11 @@ header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
                     <input type="hidden" id="recovery-user-id">
                     <div class="input-group">
                         <label>Nueva Contraseña</label>
-                        <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres">
+                        <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
                     </div>
                     <div class="input-group">
                         <label>Confirmar Contraseña</label>
-                        <input type="password" id="confirmPassword" placeholder="Repite la contraseña">
+                        <input type="password" id="confirmPassword" placeholder="Repite la contraseña" autocomplete="new-password">
                     </div>
                     <div id="recovery-error2" style="display:none; background:#fee2e2; color:#b91c1c; padding:10px 12px; border-radius:8px; font-size:.83rem; margin-bottom:14px;"></div>
                     <button class="btn-login" onclick="guardarNuevaPassword()">Guardar Nueva Contraseña</button>

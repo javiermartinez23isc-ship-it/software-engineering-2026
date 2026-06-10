@@ -1,11 +1,16 @@
 <?php
+// ============================================================
+// db.example.php — Archivo de ejemplo de configuración
+// Copia este archivo como db.php y completa tus credenciales
+// ============================================================
+
 // Zona horaria de México (Centro: UTC-6 / UTC-5 en verano)
 date_default_timezone_set('America/Mexico_City');
 
-$host = "127.0.0.1";
-$port = "3307";
-$user = "root";
-$pass = "";
+$host = "localhost";
+$port = "3307";        // Puerto MySQL configurado en XAMPP
+$user = "root";        // Usuario de MySQL (por defecto: root)
+$pass = "";            // ← Ingresa tu contraseña de MySQL aquí
 $db   = "agenda_vital";
 
 $conexion = mysqli_connect($host, $user, $pass, $db, $port);
@@ -15,7 +20,7 @@ if (!$conexion) {
 }
 
 // Sincronizar zona horaria de MySQL con PHP
-$offset = date('P'); // Ej: "-06:00"
+$offset = date('P');
 mysqli_query($conexion, "SET time_zone = '$offset'");
 
 // Auto-marcar como "No asistió"(5) las citas Pendientes o Confirmadas cuya hora ya pasó

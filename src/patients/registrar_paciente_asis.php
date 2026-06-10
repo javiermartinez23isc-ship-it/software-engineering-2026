@@ -74,16 +74,16 @@ if (mysqli_num_rows($check) > 0) {
 }
 
 // ── Insertar nuevo paciente ───────────────────────────────────────────────────
-$pass_provisional = 'Nava2026*';
+$pass_provisional     = 'Nava2026*';
+$pass_provisional_hash = mysqli_real_escape_string($conexion, password_hash($pass_provisional, PASSWORD_BCRYPT));
 
-// ap_materno puede ser vacío → se guarda como NULL si está vacío
 $ap_materno_sql = ($ap_materno_esc !== '') ? "'$ap_materno_esc'" : 'NULL';
 $telefono_sql   = ($telefono_esc   !== '') ? "'$telefono_esc'"   : 'NULL';
 
 $query = "INSERT INTO usuario 
             (id_tipo_usuario, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena_hash, contrasena_provisional)
           VALUES 
-            (3, '$nombre_esc', '$ap_paterno_esc', $ap_materno_sql, $telefono_sql, '$correo_esc', '$pass_provisional', 1)";
+            (3, '$nombre_esc', '$ap_paterno_esc', $ap_materno_sql, $telefono_sql, '$correo_esc', '$pass_provisional_hash', 1)";
 
 if (mysqli_query($conexion, $query)) {
     $correo_js = addslashes($correo);

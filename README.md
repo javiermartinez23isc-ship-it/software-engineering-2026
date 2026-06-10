@@ -21,91 +21,123 @@ Agenda Vital es una plataforma web para consultorios independientes que automati
 
 ## Requisitos previos
 
-- [XAMPP](https://www.apachefriends.org/download.html) instalado
-- Cuenta de Gmail personal (no institucional) con **Verificación en 2 pasos** activa
-- Al descargar desde GitHub renombrar la carpeta como: AgendaVital
+- [XAMPP](https://www.apachefriends.org/download.html) instalado.
+- visual studio code.
+- tener instalado git. https://git-scm.com/install
+- Navegador web: Cualquier moderno.
 ---
 
 ## Instalación paso a paso
 
-### 1. Colocar los archivos
-- Cortar la carpeta completa `AgendaVital` (incluyendo `vendor/`)
-- Ingresa en tu explorador de archivos al apartado de `Disco local (C:)`
-- Buscar la carpeta `xampp`, después la carpeta `htdocs`
-- La ruta final debe ser:
-```
-C:\xampp\htdocs
-```
--Pegar la carpeta `AgendaVital` previamente cortada dentro de la 
-dirección actual
+## 1. Clonar el repositorio
 
-La estructura debe verse así:
+Todo el proceso se hace desde **Visual Studio Code**.
+
+### Clonar desde VS Code
+
+1. copia el link del repositorio: https://github.com/javiermartinez23isc-ship-it/software-engineering-2026.git
+2. Abre **Visual Studio Code**
+3. En la pantalla principal selecciona la opcion "Clone Git Repository".
+4. Pega la URL del repositorio anteriormente copiada.
+5. Cuando te pida seleccionar una carpeta de destino, navega a:
 ```
-C:\xampp\htdocs\AgendaVital\
-├── .kiro\
-├── backend\
-├── config\
-├── database\
-├── docs\
-├── fron\
-├── public\
-├── software-engineering-2026\
-├── src\
-├── vendor\              ← PHPMailer ya incluido aquí
-├── views\
-├── .env
-├── .env.example
-├── composer.json
-├── composer.lock
-└── README.md
+C:\xampp\htdocs\
 ```
+6. Haz clic en **Select as Repository Destination**
+7. Espera a que termine la descarga
+8. Cuando aparezca el mensaje **"Would you like to open the cloned repository?"**, haz clic en **Open**
+9. Una vez clonado cambiaras de la rama "main" a la rama "desarrollo", mira la esquina inferior izquierda de la ventana de VS Code, verás que aparece el nombre de la rama actual (main).
+10. Haz clic sobre ese nombre, se abrirá una lista en la parte superior de la pantalla con todas tus ramas locales y remotas.
+11. Selecciona la rama "desarrollo" y cierra visual studio code.
+
+12. ahora navega en el explorador de archivos a:
+```
+C:\xampp\htdocs\
+```
+13. Dentro de htdocs encontraras una carpeta llamada software-engineering-2026, renombrala a "AgendaVital", especificamente ese nombre y necesitarias cerrar visual para que te deje reenombrarlo.
+
 
 ### 2. Configurar el puerto de MySQL en XAMPP
 
 Este proyecto usa el puerto **3307** en lugar del 3306 por defecto.
 
 **Cambiar puerto en MySQL:**
-1. Panel XAMPP → fila MySQL → `Config` → `my.ini`
-2. Busca `port=3306` (aparece dos veces) y cámbiala a `port=3307`
+1. Abre XAMPP → fila MySQL → `Config` → `my.ini` entrar como bloc de notas
+2. Busca (para facilitar la busqueda utiliza el comando "ctrl + b") `port=3306` (aparece dos veces) y cámbiala a `port=3307`
 3. Guarda y cierra
 
 **Apuntar phpMyAdmin al nuevo puerto:**
-1. Panel XAMPP → fila Apache → `Config` → `phpMyAdmin (config.inc.php)`
+1. XAMPP → fila Apache → `Config` → `phpMyAdmin (config.inc.php)` entrar como bloc de notas
 2. Busca el bloque `/* Bind to the localhost ipv4 address */`
 3. Agrega o edita esta línea:
 ```php
-$cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
+$cfg['Servers'][$i]['host'] = '127.0.0.1:3307'; (algunas veces solo se tiene que agregar ":3307")
 ```
 4. Guarda y cierra
+ahora cierra XAMPP.
 
 ### 3. Configurar la zona horaria en PHP
 
-1. Abre **XAMPP Control Panel** como administrador
+1. Vuelve a abrir **XAMPP Control Panel** como administrador
 2. En la fila **Apache** dar clic en el apartado **Config**
 3. Buscar la opción **PHP (php.ini)** y entrar como bloc de notas
-4. Busca `date.timezone` y cámbia a:
+4. Busca (para facilitar la busqueda utiliza el comando "ctrl + b") `date.timezone=Europe/Berlin` y cámbia a:
 ```ini
 date.timezone=America/Mexico_City
 ```
-3. Busca `;extension=zip` y quítale el punto y coma:
+5. En ese mismo archivo.
+6. Busca (para facilitar la busqueda utiliza el comando "ctrl + b") `;extension=zip` y quítale el punto y coma:
 ```ini
 extension=zip
 ```
-4. Guarda el archivo
+7. En caso de no encontrarse, buscar ";extension=xsl" y  justo debajo de esta linea se debe agregar "extension=zip" sin comillas asi tal cual como se muestra.
+8. Guarda el archivo. cierra el archivo.
+9. cierra xampp y vuelve a abrirlo.
+10. apaga y prende los servicios: 
+11. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
+12. Haz clic en **Start** en la fila de **MySQL**
+13. Ambos deben quedar en **verde** con sus puertos mostrados
 
-### 4. Crear la base de datos
+
+## 4. Configurar las credenciales de base de datos
+
+1. Ahora vuelve a abrir visaul studio code. para abrir la carpeta clonada y reenombrada "AgendaVital".
+2. En visual studio code en la esquina superior izquierda clic en "File", luego open folder.
+3. navega hasta C:\xampp\htdocs\ y selecciona la carpeta "AgendaVital" y clic en "Select folder".
+4. Dentro de la carpeta del proyecto ve a `config\`
+5. Verás el archivo `db.example.php`
+6. **Cópialo** y  pegalo dentro de la misma carpeta config y renombra la copia como `db.php` — debe quedar así:
+```
+config\
+    ├── db.example.php   ← archivo original, no tocar
+    └── db.php           ← tu copia con tus credenciales
+```
+4. Abre `db.php` y ajusta los valores según tu instalación:
+1. $host = "localhost"; "se queda asi"
+2. $port = "3307"; "se deja este puerto obligatoriamente"
+3. $user = "root"; "Viene por defecto"
+4. $pass = ""; "Viene sin contraseña por defecto"
+5. $db   = "agenda_vital"; "Utilizar ese nombre obligatoriamente para la bd"
+
+Si tu MySQL de XAMPP tiene contraseña, escríbela entre las comillas. Si no tiene contraseña (instalación por defecto), déjala vacía:
+**Guarda** el archivo.
+
+>  El usuario por defecto de XAMPP es `root` y normalmente no tiene contraseña. Solo cambia `$pass` si configuraste una contraseña diferente.
+
+
+### 5. Crear la base de datos
 
 1. Inicia Apache y MySQL desde el panel XAMPP 
 2. En la fila MySQL selecciona **Admin** que abre la siguiente direción: `http://localhost/phpmyadmin/`
-3. Crea una base de datos llamada `agenda_vital` con cotejamiento `utf8mb4_general_ci`
-4. Selecciona `agenda_vital` en el panel izquierdo
+3. Crea una base de datos llamada `agenda_vital` en el panel izquierdo la opcion "Nueva" ahi la crearas.
+4. una vez creada Seleccionala `agenda_vital` en el panel izquierdo
 5. Ve a la pestaña **SQL**
-6. Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
+6. ahora abre el explorador de archivos y Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
 7. Dentro de la ruta abre el archivo `base de datos` como bloc de notas
-8. Copia todo el contenido y pégalo en el apartado de **SQL** en phpMyAdmin
-9. Haz clic en **Continuar**
+8. Copia todo el contenido y pégalo en el apartado de **SQL** que abriste en el paso 5.
+9. Haz clic en **Continuar** y listo.
 
-### 5. Acceder al sistema
+### 6. Acceder al sistema
 
 Abre el navegador y dirígete a:
 ```

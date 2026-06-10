@@ -10,16 +10,16 @@ if (empty($usuario) || empty($password)) {
     exit();
 }
 
-$consulta  = "SELECT id_usuario, id_tipo_usuario, nombre, contrasena_provisional
-              FROM usuario
-              WHERE correo = '$usuario' AND contrasena_hash = '$password'";
+// Buscar usuario por correo (sin comparar contraseña en SQL)
+$consulta  = "SELECT id_usuario, id_tipo_usuario, nombre, contrasena_hash, contrasena_provisional
+              FROM usuario WHERE correo = '$usuario'";
 $resultado = mysqli_query($conexion, $consulta);
-$filas     = mysqli_fetch_array($resultado);
+$filas     = mysqli_fetch_assoc($resultado);
 
-if ($filas) {
-    $_SESSION['usuario_id']        = $filas['id_usuario'];
-    $_SESSION['nombre']            = $filas['nombre'];
-    $_SESSION['id_tipo_usuario']   = $filas['id_tipo_usuario'];
+if ($filas && password_verify($password, $filas['contrasena_hash'])) {
+    $_SESSION['usuario_id']      = $filas['id_usuario'];
+    $_SESSION['nombre']          = $filas['nombre'];
+    $_SESSION['id_tipo_usuario'] = $filas['id_tipo_usuario'];
 
     // Si es paciente con contraseña provisional → forzar cambio
     if ($filas['id_tipo_usuario'] == 3 && (int)$filas['contrasena_provisional'] === 1) {
@@ -40,7 +40,4 @@ if ($filas) {
 } else {
     echo "<script>alert('Error: Usuario o contraseña incorrectos'); window.history.back();</script>";
 }
-
-mysqli_free_result($resultado);
-mysqli_close($conexion);
 ?>

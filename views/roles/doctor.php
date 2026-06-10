@@ -23,7 +23,7 @@ header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 $id_user = $_SESSION['usuario_id'];
 $nombre_usuario = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Doctor";
 
-// 2. Consulta de citas — solo activas (1,4), con flag si fue reprogramada
+// 2. Consulta de citas — solo activas (1, 2, 4), con flag si fue reprogramada
 $query_citas = "SELECT 
                     c.id_cita, 
                     c.id_usuario, 
@@ -36,10 +36,10 @@ $query_citas = "SELECT
                 INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
                 INNER JOIN horario h ON c.id_horario = h.id_horario 
                 INNER JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 4)
+                WHERE c.id_estado_cita IN (1, 2, 4)
                 AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 ORDER BY 
-                    FIELD(c.id_estado_cita, 1, 4),
+                    FIELD(c.id_estado_cita, 1, 2, 4),
                     h.fecha ASC, h.hora_inicio ASC";
 
 $res_citas   = mysqli_query($conexion, $query_citas);
@@ -406,6 +406,10 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                             <div style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
                                 ✅ Perfil actualizado correctamente.
                             </div>
+                        <?php elseif ($msg_perfil === 'sin_cambios'): ?>
+                            <div style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:12px 15px; border-radius:8px; margin-bottom:20px;">
+                                ℹ️ No se realizaron cambios en el perfil.
+                            </div>
                         <?php endif; ?>
 
                         <!-- Foto de perfil actual -->
@@ -425,27 +429,27 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Nombre(s) *</label>
                                     <input type="text" name="nombre" required
-                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]+"
-                                           title="Solo letras, espacios y guiones"
-                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['nombre'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Paterno</label>
                                     <input type="text" name="apellido_paterno"
-                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
-                                           title="Solo letras, espacios y guiones"
-                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['apellido_paterno'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
                                 <div>
                                     <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Materno</label>
                                     <input type="text" name="apellido_materno"
-                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]*"
-                                           title="Solo letras, espacios y guiones"
-                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-]/g,'')"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
                                            value="<?php echo htmlspecialchars($datos_perfil['apellido_materno'] ?? ''); ?>"
                                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                                 </div>
@@ -464,6 +468,8 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                             <div style="margin-bottom:15px;">
                                 <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Correo Electrónico *</label>
                                 <input type="email" name="correo" required
+                                       pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                                       title="Ingresa un correo válido con formato nombre@dominio.ext"
                                        value="<?php echo htmlspecialchars($datos_perfil['correo'] ?? ''); ?>"
                                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
                             </div>
@@ -474,10 +480,12 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                        style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; background:white;">
                                 <small style="color:#64748b;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
                                 <?php if (!empty($datos_perfil['foto_perfil'])): ?>
-                                <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:#ef4444; cursor:pointer;">
-                                    <input type="checkbox" name="quitar_foto" value="1">
-                                    🗑️ Quitar foto de perfil actual
-                                </label>
+                                <button type="submit" name="quitar_foto" value="1"
+                                        onclick="return confirm('¿Estás seguro de que deseas quitar tu foto de perfil?')"
+                                        style="margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:7px 14px; border-radius:8px; font-size:0.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .18s;"
+                                        onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                                    🗑️ Quitar foto de perfil
+                                </button>
                                 <?php endif; ?>
                             </div>
 

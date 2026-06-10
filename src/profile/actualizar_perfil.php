@@ -65,7 +65,7 @@ if ($tipo_usuario == 3) {
             echo "<script>alert('Error: La contraseña debe tener al menos 6 caracteres.'); window.history.back();</script>";
             exit();
         }
-        $pass_escapada = mysqli_real_escape_string($conexion, $nueva_password);
+        $pass_escapada = mysqli_real_escape_string($conexion, password_hash($nueva_password, PASSWORD_BCRYPT));
         $pass_sql = ", contrasena_hash = '$pass_escapada'";
     }
 
@@ -141,7 +141,7 @@ if ($tipo_usuario == 3) {
             echo "<script>alert('Error: La contraseña debe tener al menos 6 caracteres.'); window.history.back();</script>";
             exit();
         }
-        $pass_escapada = mysqli_real_escape_string($conexion, $nueva_password);
+        $pass_escapada = mysqli_real_escape_string($conexion, password_hash($nueva_password, PASSWORD_BCRYPT));
         $pass_sql = ", contrasena_hash = '$pass_escapada'";
     }
 
@@ -171,7 +171,37 @@ if ($tipo_usuario == 3) {
             WHERE id_usuario = '$id_usuario'";
 }
 
-// 4. Ejecutar UPDATE
+// 4. Verificar si hay cambios reales antes de guardar
+$datos_actuales = mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT nombre, apellido_paterno, apellido_materno, telefono, correo, foto_perfil
+     FROM usuario WHERE id_usuario = '$id_usuario'"));
+
+$hay_cambios = false;
+
+if ($tipo_usuario == 3) {
+    // Paciente: cambio en teléfono, foto o contraseña
+    if ($telefono !== ($datos_actuales['telefono'] ?? '')) $hay_cambios = true;
+    if (!empty($nueva_password)) $hay_cambios = true;
+    if ($quitar_foto) $hay_cambios = true;
+    if ($foto_sql !== '' && $foto_sql !== false) $hay_cambios = true;
+} else {
+    // Doctor / Asistente: cambio en cualquier campo
+    if ($nombre           !== ($datos_actuales['nombre']           ?? '')) $hay_cambios = true;
+    if ($apellido_paterno !== ($datos_actuales['apellido_paterno'] ?? '')) $hay_cambios = true;
+    if ($apellido_materno !== ($datos_actuales['apellido_materno'] ?? '')) $hay_cambios = true;
+    if ($telefono         !== ($datos_actuales['telefono']         ?? '')) $hay_cambios = true;
+    if ($correo           !== ($datos_actuales['correo']           ?? '')) $hay_cambios = true;
+    if (!empty($nueva_password)) $hay_cambios = true;
+    if ($quitar_foto) $hay_cambios = true;
+    if ($foto_sql !== '' && $foto_sql !== false) $hay_cambios = true;
+}
+
+if (!$hay_cambios) {
+    header("Location: $ruta_regreso?perfil=sin_cambios");
+    exit();
+}
+
+// 5. Ejecutar UPDATE
 if (mysqli_query($conexion, $sql)) {
     if ($tipo_usuario != 3) {
         $_SESSION['nombre'] = $_POST['nombre'] ?? $_SESSION['nombre'];
