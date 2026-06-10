@@ -50,7 +50,7 @@ C:\xampp\htdocs\
 10. Haz clic sobre ese nombre, se abrirá una lista en la parte superior de la pantalla con todas tus ramas locales y remotas.
 11. Selecciona la rama "desarrollo" y cierra visual studio code.
 
-12. ahora navega a:
+12. ahora navega en el explorador de archivos a:
 ```
 C:\xampp\htdocs\
 ```
@@ -128,10 +128,10 @@ Si tu MySQL de XAMPP tiene contraseña, escríbela entre las comillas. Si no tie
 3. Crea una base de datos llamada `agenda_vital` en el panel izquierdo la opcion "Nueva" ahi la crearas.
 4. una vez creada Seleccionala `agenda_vital` en el panel izquierdo
 5. Ve a la pestaña **SQL**
-6. Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
+6. ahora abre el explorador de archivos y Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
 7. Dentro de la ruta abre el archivo `base de datos` como bloc de notas
-8. Copia todo el contenido y pégalo en el apartado de **SQL** en phpMyAdmin
-9. Haz clic en **Continuar**
+8. Copia todo el contenido y pégalo en el apartado de **SQL** que abriste en el paso 5.
+9. Haz clic en **Continuar** y listo.
 
 ### 6. Acceder al sistema
 
