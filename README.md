@@ -101,9 +101,12 @@ extension=zip
 
 ## 4. Configurar las credenciales de base de datos
 
-1. Dentro de la carpeta del proyecto ve a `config\`
-2. Verás el archivo `db.example.php`
-3. **Cópialo** y  pegalo dentro de la misma carpeta config y renombra la copia como `db.php` — debe quedar así:
+1. Ahora vuelve a abrir visaul studio code. para abrir la carpeta clonada y reenombrada "AgendaVital".
+2. En visual studio code en la esquina superior izquierda clic en "File", luego open folder.
+3. navega hasta C:\xampp\htdocs\ y selecciona la carpeta "AgendaVital" y clic en "Select folder".
+4. Dentro de la carpeta del proyecto ve a `config\`
+5. Verás el archivo `db.example.php`
+6. **Cópialo** y  pegalo dentro de la misma carpeta config y renombra la copia como `db.php` — debe quedar así:
 ```
 config\
     ├── db.example.php   ← archivo original, no tocar
