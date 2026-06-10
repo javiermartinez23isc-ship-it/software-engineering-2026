@@ -23,34 +23,7 @@ header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 $id_user = $_SESSION['usuario_id'];
 $nombre_usuario = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Doctor";
 
-// === LOGIC REFACTOR: NAVEGACIÓN DINÁMICA DE SEMANAS ===
-// Detectar si se pasa una fecha de inicio por URL; si no, calcular el lunes de la semana en curso
-if (isset($_GET['semana'])) {
-    $fecha_base = strtotime($_GET['semana']);
-} else {
-    $fecha_base = time();
-}
-
-$dia_sem_base = (int)date('N', $fecha_base);
-// Retroceder los días necesarios para fijar la marca de tiempo en el Lunes de esa semana
-$lunes_ts_dinamico = $fecha_base - (($dia_sem_base - 1) * 86400);
-
-// Generar una única matriz de la semana actual bajo consulta (Lun-Vie)
-$semana_vista = [];
-for ($d = 0; $d < 5; $d++) {
-    $semana_vista[] = date('Y-m-d', $lunes_ts_dinamico + ($d * 86400));
-}
-
-// Configurar los controles de navegación
-$url_anterior  = "?semana=" . date('Y-m-d', $lunes_ts_dinamico - (7 * 86400));
-$url_siguiente = "?semana=" . date('Y-m-d', $lunes_ts_dinamico + (7 * 86400));
-$url_hoy       = "?semana=" . date('Y-m-d', time() - (((int)date('N') - 1) * 86400));
-
-// Variable requerida por tus reglas de descarte de fechas pasadas
-$hoy_doc = date('Y-m-d');
-
-// --- DATOS DEL DASHBOARD & AGENDA ---
-// Consulta adaptada: Citas activas (Estados 1 o 4) agrupadas por cercanía cronológica
+// 2. Consulta de citas — solo activas (1, 2, 4), con flag si fue reprogramada
 $query_citas = "SELECT 
                     c.id_cita, 
                     c.id_usuario, 
@@ -63,34 +36,14 @@ $query_citas = "SELECT
                 INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
                 INNER JOIN horario h ON c.id_horario = h.id_horario 
                 INNER JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 4)
+                WHERE c.id_estado_cita IN (1, 2, 4)
                 AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 ORDER BY 
-                    FIELD(c.id_estado_cita, 1, 4),
+                    FIELD(c.id_estado_cita, 1, 2, 4),
                     h.fecha ASC, h.hora_inicio ASC";
 
 $res_citas   = mysqli_query($conexion, $query_citas);
 $error_mysql = (!$res_citas) ? mysqli_error($conexion) : "";
-
-// Métricas KPI dinámicas para el nuevo Dashboard superior (Datos basados en el día de hoy)
-$total_hoy = 0;
-$reprogramadas_hoy = 0;
-$proxima_cita_texto = "Sin citas hoy";
-
-if ($res_citas && mysqli_num_rows($res_citas) > 0) {
-    while($row = mysqli_fetch_assoc($res_citas)) {
-        if ($row['fecha'] === $hoy_doc) {
-            $total_hoy++;
-            if ((int)$row['fue_reprogramada'] > 0) {
-                $reprogramadas_hoy++;
-            }
-            if ($proxima_cita_texto === "Sin citas hoy" && strtotime($row['hora_inicio']) >= time()) {
-                $proxima_cita_texto = date("g:i a", strtotime($row['hora_inicio'])) . " - " . $row['paciente'];
-            }
-        }
-    }
-    mysqli_data_seek($res_citas, 0); // Reiniciar el puntero de datos para la tabla HTML inferior
-}
 
 // 3. Consulta de pacientes para la sección Historial
 $query_pacientes_hist = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo 
@@ -99,15 +52,29 @@ $query_pacientes_hist = "SELECT id_usuario, nombre, apellido_paterno, apellido_m
                          ORDER BY nombre ASC";
 $res_pacientes_hist = mysqli_query($conexion, $query_pacientes_hist);
 
-// Rango de horas (9am-7pm)
+// 4. Calendario dinámico para bloquear/desbloquear (semana actual + siguiente, Lun-Vie, 9am-7pm)
+$hoy_doc     = date('Y-m-d');
+$hoy_ts_doc  = strtotime($hoy_doc);
+$dia_sem_doc = (int)date('N');
+$lunes_ts_doc = $hoy_ts_doc - (($dia_sem_doc - 1) * 86400);
+
+$semanas_doc = [];
+for ($s = 0; $s < 2; $s++) {
+    $sem = [];
+    for ($d = 0; $d < 5; $d++) {
+        $sem[] = date('Y-m-d', $lunes_ts_doc + ($s * 7 + $d) * 86400);
+    }
+    $semanas_doc[] = $sem;
+}
+
 $horas_doc = [];
 for ($h = 9; $h < 19; $h++) {
     $horas_doc[] = sprintf('%02d:00:00', $h);
 }
 
-// Obtener los slots registrados en el rango de la semana seleccionada
-$f_ini_doc = $semana_vista[0];
-$f_fin_doc = $semana_vista[4];
+// Obtener todos los slots registrados en BD para el rango
+$f_ini_doc = $semanas_doc[0][0];
+$f_fin_doc = $semanas_doc[1][4];
 $res_slots_doc = mysqli_query($conexion,
     "SELECT fecha, hora_inicio, id_horario, estado, disponible FROM horario
      WHERE fecha BETWEEN '$f_ini_doc' AND '$f_fin_doc'");
@@ -129,7 +96,7 @@ $res_perfil = mysqli_query($conexion, $query_perfil);
 $datos_perfil = $res_perfil ? mysqli_fetch_assoc($res_perfil) : [];
 if (!isset($datos_perfil['foto_perfil'])) $datos_perfil['foto_perfil'] = null;
 
-// 6. Datos del consultorio
+// 6. Datos del consultorio (tabla puede no existir aún)
 $logo_consultorio   = '';
 $nombre_consultorio = 'Consultorio Privado';
 $res_conf = @mysqli_query($conexion, "SELECT clave, valor FROM configuracion_consultorio WHERE clave IN ('logo_consultorio','nombre_consultorio')");
@@ -140,6 +107,7 @@ if ($res_conf) {
     }
 }
 
+// Mensaje de éxito/error desde redirección
 $msg_perfil      = isset($_GET['perfil'])      ? $_GET['perfil']      : '';
 $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
 ?>
@@ -150,61 +118,6 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda Vital | Panel del Doctor</title>
     <link rel="stylesheet" href="../../public/assets/css/doctor.css">
-    <style>
-        /* CSS Adicional integrado para las nuevas mejoras del Dashboard y Controles */
-        .dashboard-kpis {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .kpi-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 5px solid var(--doctor-main, #0ea5e9);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .kpi-card h4 { margin: 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
-        .kpi-card p { margin: 8px 0 0; font-size: 1.6rem; font-weight: bold; color: #1e293b; }
-        .kpi-card .kpi-subtext { font-size: 0.8rem; color: #94a3b8; font-weight: normal; }
-        
-        .nav-semana-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8fafc;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-        }
-        .btn-nav-vital {
-            background: #475569;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .btn-nav-vital:hover { background: #334155; }
-        .btn-nav-hoy { background: var(--doctor-main, #0ea5e9); }
-        .btn-nav-hoy:hover { filter: brightness(0.9); }
-        
-        .btn-bloqueo-dia {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn-bloqueo-dia:hover { background: #e2e8f0; }
-    </style>
 </head>
 <body>
 
@@ -226,6 +139,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
         <div class="content-wrapper">
             <nav class="sidebar" id="sidebar">
+                <!-- Círculo del consultorio — clickeable solo para el doctor -->
                 <div class="profile-circle consultorio-clickable" 
                      onclick="abrirModalConsultorio()" 
                      title="Configurar consultorio"
@@ -236,7 +150,8 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                     <?php else: ?>
                         <span id="sidebar-logo-placeholder" style="font-size:1.6rem; display:flex; align-items:center; justify-content:center; width:100%; height:100%;">🏥</span>
                     <?php endif; ?>
-                    <span style="position:absolute; bottom:0; right:0; background: #0ea5e9; color:white; border-radius:50%; width:20px; height:20px; font-size:0.65rem; display:flex; align-items:center; justify-content:center; border:2px solid white;">✏️</span>
+                    <!-- Ícono de edición -->
+                    <span style="position:absolute; bottom:0; right:0; background:var(--doctor-main); color:white; border-radius:50%; width:20px; height:20px; font-size:0.65rem; display:flex; align-items:center; justify-content:center; border:2px solid white;">✏️</span>
                 </div>
                 <h3>Dr. <?php echo htmlspecialchars($datos_perfil['apellido_paterno'] ?? $nombre_usuario); ?></h3>
                 <p id="sidebar-nombre-consultorio"><?php echo htmlspecialchars($nombre_consultorio); ?></p>
@@ -249,25 +164,8 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
             </nav>
 
             <main class="main">
-                
                 <div id="vista-agenda" class="seccion activa">
                     <h1>Agenda de Pacientes</h1>
-                    
-                    <div class="dashboard-kpis">
-                        <div class="kpi-card" style="border-left-color: #0ea5e9;">
-                            <h4>Citas para Hoy</h4>
-                            <p><?php echo $total_hoy; ?> <span class="kpi-subtext">consultas</span></p>
-                        </div>
-                        <div class="kpi-card" style="border-left-color: #a855f7;">
-                            <h4>Reprogramadas</h4>
-                            <p><?php echo $reprogramadas_hoy; ?> <span class="kpi-subtext">pacientes</span></p>
-                        </div>
-                        <div class="kpi-card" style="border-left-color: #eab308;">
-                            <h4>Próximo Paciente</h4>
-                            <p style="font-size: 1rem; margin-top: 15px; color: #475569;"><?php echo htmlspecialchars($proxima_cita_texto); ?></p>
-                        </div>
-                    </div>
-
                     <div class="card">
                         <h3>Próximas Citas Programadas</h3>
                         
@@ -306,6 +204,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                     }
                                     if (mysqli_num_rows($res_citas) > 0): ?>
                                         <?php while($cita = mysqli_fetch_assoc($res_citas)):
+                                            // Si fue reprogramada, mostrar ese estado en lugar del original
                                             $estado_mostrar = ((int)$cita['fue_reprogramada'] > 0 && strtolower($cita['nombre_estado']) === 'pendiente')
                                                 ? 'Reprogramada'
                                                 : $cita['nombre_estado'];
@@ -338,6 +237,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                             </div>
                         <?php endif; ?>
                     </div>
+
                 </div>
 
                 <div id="vista-historial" class="seccion">
@@ -396,46 +296,27 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                     <div class="card">
                         <h3>Gestión de Disponibilidad</h3>
                         <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">
-                            Navega entre semanas usando los controles. Haz clic en un horario libre (✅) para bloquearlo o en un candado (🔒) para liberarlo.
+                            Haz clic en un horario disponible para bloquearlo. Los horarios bloqueados no aparecerán para los pacientes al agendar citas.
                         </p>
 
-                        <div class="nav-semana-container">
-                            <a href="<?php echo $url_anterior; ?>" class="btn-nav-vital">← Semana Anterior</a>
-                            <span style="font-weight: bold; color: #334155;">
-                                Semana del <?php echo date('d/m/Y', strtotime($semana_vista[0])); ?> al <?php echo date('d/m/Y', strtotime($semana_vista[4])); ?>
-                            </span>
-                            <div>
-                                <a href="<?php echo $url_hoy; ?>" class="btn-nav-vital btn-nav-hoy" style="margin-right:5px;">Esta Semana</a>
-                                <a href="<?php echo $url_siguiente; ?>" class="btn-nav-vital">Semana Siguiente →</a>
-                            </div>
-                        </div>
-
+                        <?php
+                        $dias_label_doc = ['Lun','Mar','Mié','Jue','Vie'];
+                        foreach ($semanas_doc as $idx_sd => $semana_d):
+                        ?>
+                        <p style="font-weight:700; color:#475569; font-size:.82rem; margin:12px 0 5px;">
+                            Semana <?php echo $idx_sd === 0 ? 'actual' : 'siguiente'; ?>
+                            (<?php echo date('d/m', strtotime($semana_d[0])); ?> – <?php echo date('d/m', strtotime($semana_d[4])); ?>)
+                        </p>
                         <div style="overflow-x:auto; border:1px solid #ddd; border-radius:10px; margin-bottom:10px;">
                             <table style="width:100%; border-collapse:collapse; text-align:center; min-width:460px;">
                                 <thead>
                                     <tr style="background:#475569; color:white;">
                                         <th style="padding:10px 8px; border:1px solid #333; font-size:0.82rem;">Hora</th>
-                                        <?php 
-                                        $dias_label_doc = ['Lun','Mar','Mié','Jue','Vie'];
-                                        foreach ($semana_vista as $i => $fecha_d): 
-                                        ?>
+                                        <?php foreach ($semana_d as $i => $fecha_d): ?>
                                         <th style="padding:10px 8px; border:1px solid #333; font-size:0.82rem; text-align:center;">
                                             <?php echo $dias_label_doc[$i]; ?><br>
-                                            <span style="font-weight:400; font-size:0.72rem CONTAINER;"><?php echo date('d/m', strtotime($fecha_d)); ?></span>
+                                            <span style="font-weight:400; font-size:0.72rem;"><?php echo date('d/m', strtotime($fecha_d)); ?></span>
                                         </th>
-                                        <?php endforeach; ?>
-                                    </tr>
-                                    
-                                    <tr style="background: #f8fafc;">
-                                        <td style="padding:6px; border:1px solid #ddd; font-weight:bold; font-size:0.75rem; color:#475569;">Todo el día</td>
-                                        <?php foreach ($semana_vista as $fecha_d): ?>
-                                        <td style="padding:6px; border:1px solid #ddd;">
-                                            <?php if ($fecha_d >= $hoy_doc): ?>
-                                                <button type="button" class="btn-bloqueo-dia" onclick="bloquearDiaCompleto('<?php echo $fecha_d; ?>')">🚫 Bloquear</button>
-                                            <?php else: ?>
-                                                <span style="color:#cbd5e1; font-size:0.7rem;">—</span>
-                                            <?php endif; ?>
-                                        </td>
                                         <?php endforeach; ?>
                                     </tr>
                                 </thead>
@@ -445,7 +326,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                         <td style="padding:8px; border:1px solid #ddd; font-weight:600; background:#f8fafc; font-size:0.8rem; white-space:nowrap;">
                                             <?php echo date('g:i a', strtotime($hora_d)); ?>
                                         </td>
-                                        <?php foreach ($semana_vista as $fecha_d):
+                                        <?php foreach ($semana_d as $fecha_d):
                                             $key_d = $fecha_d . '|' . $hora_d;
                                             $pasado = ($fecha_d < $hoy_doc);
                                             if ($pasado):
@@ -454,7 +335,9 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                         <?php else:
                                             if (isset($slots_doc[$key_d])):
                                                 $sd = $slots_doc[$key_d];
+                                                // Slot con cita activa: no se puede bloquear/desbloquear
                                                 if ($sd['estado'] === 'ocupado' && $sd['disponible'] == 0):
+                                                    // Bloqueado por el doctor
                                         ?>
                                             <td style="border:1px solid #ddd; height:46px; padding:4px;">
                                                 <form method="POST" action="../../src/schedule/bloquear_horario.php" style="margin:0;">
@@ -468,8 +351,10 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                                 </form>
                                             </td>
                                         <?php elseif ($sd['estado'] === 'ocupado' && $sd['disponible'] == 1): ?>
+                                            <!-- Ocupado por cita — no se puede bloquear -->
                                             <td style="border:1px solid #ddd; height:46px; background:#fef9c3; color:#92400e; font-size:0.75rem; vertical-align:middle;">📅</td>
                                         <?php else: ?>
+                                            <!-- Disponible -->
                                             <td style="border:1px solid #ddd; height:46px; padding:4px;">
                                                 <form method="POST" action="../../src/schedule/bloquear_horario.php" style="margin:0;">
                                                     <input type="hidden" name="id_horario" value="<?php echo $sd['id']; ?>">
@@ -483,6 +368,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                             </td>
                                         <?php endif; ?>
                                         <?php else: ?>
+                                            <!-- Slot virtual — disponible, se crea al bloquear -->
                                             <td style="border:1px solid #ddd; height:46px; padding:4px;">
                                                 <form method="POST" action="../../src/schedule/bloquear_horario.php" style="margin:0;">
                                                     <input type="hidden" name="id_horario" value="0">
@@ -502,6 +388,7 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                                 </tbody>
                             </table>
                         </div>
+                        <?php endforeach; ?>
 
                         <div style="margin-top:10px; display:flex; gap:20px; font-size:0.82rem; color:#64748b; flex-wrap:wrap;">
                             <span>✅ Disponible — clic para bloquear</span>
@@ -525,75 +412,215 @@ $msg_consultorio = isset($_GET['consultorio']) ? $_GET['consultorio'] : '';
                             </div>
                         <?php endif; ?>
 
+                        <!-- Foto de perfil actual -->
                         <div style="text-align:center; margin-bottom:25px;">
                             <?php
                             $foto_actual = !empty($datos_perfil['foto_perfil'])
                                 ? '../../public/' . htmlspecialchars($datos_perfil['foto_perfil'])
                                 : '../../public/assets/img/imagen_persona_sin.png';
                             ?>
-                            <img src="<?php echo $foto_actual; ?>" alt="Foto Perfil" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #cbd5e1;">
+                            <img src="<?php echo $foto_actual; ?>" alt="Foto de perfil"
+                                 style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid #059669;">
+                            <p style="font-size:0.8rem; color:#64748b; margin-top:8px;">Foto de perfil actual</p>
                         </div>
+
+                        <form method="POST" action="../../src/profile/actualizar_perfil.php" enctype="multipart/form-data">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Nombre(s) *</label>
+                                    <input type="text" name="nombre" required
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
+                                           value="<?php echo htmlspecialchars($datos_perfil['nombre'] ?? ''); ?>"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Paterno</label>
+                                    <input type="text" name="apellido_paterno"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
+                                           value="<?php echo htmlspecialchars($datos_perfil['apellido_paterno'] ?? ''); ?>"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Apellido Materno</label>
+                                    <input type="text" name="apellido_materno"
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]*"
+                                           title="Solo letras y espacios, sin números ni símbolos"
+                                           oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]/g,'')"
+                                           value="<?php echo htmlspecialchars($datos_perfil['apellido_materno'] ?? ''); ?>"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Teléfono</label>
+                                    <input type="tel" name="telefono"
+                                           pattern="[0-9]{7,15}"
+                                           title="Solo números, entre 7 y 15 dígitos"
+                                           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                           maxlength="15"
+                                           value="<?php echo htmlspecialchars($datos_perfil['telefono'] ?? ''); ?>"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:15px;">
+                                <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Correo Electrónico *</label>
+                                <input type="email" name="correo" required
+                                       pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                                       title="Ingresa un correo válido con formato nombre@dominio.ext"
+                                       value="<?php echo htmlspecialchars($datos_perfil['correo'] ?? ''); ?>"
+                                       style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                            </div>
+
+                            <div style="margin-bottom:15px;">
+                                <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Foto de Perfil</label>
+                                <input type="file" name="foto_perfil" accept="image/*"
+                                       style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; background:white;">
+                                <small style="color:#64748b;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
+                                <?php if (!empty($datos_perfil['foto_perfil'])): ?>
+                                <button type="submit" name="quitar_foto" value="1"
+                                        onclick="return confirm('¿Estás seguro de que deseas quitar tu foto de perfil?')"
+                                        style="margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:7px 14px; border-radius:8px; font-size:0.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .18s;"
+                                        onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                                    🗑️ Quitar foto de perfil
+                                </button>
+                                <?php endif; ?>
+                            </div>
+
+                            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+                            <p style="font-weight:bold; color:#475569; margin-bottom:10px;">Cambiar Contraseña <span style="font-weight:normal; font-size:0.85rem;">(dejar en blanco para no cambiar)</span></p>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Nueva Contraseña</label>
+                                    <input type="password" name="nueva_password" placeholder="Mínimo 6 caracteres"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:bold; margin-bottom:5px; color:#475569;">Confirmar Contraseña</label>
+                                    <input type="password" name="confirmar_password" placeholder="Repite la contraseña"
+                                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                    style="background:#059669; color:white; border:none; padding:12px 30px; border-radius:25px; font-weight:bold; cursor:pointer; font-size:1rem;">
+                                💾 Guardar Cambios
+                            </button>
+                        </form>
                     </div>
                 </div>
             </main>
         </div>
+
+        <footer class="footer-vital"></footer>
+    </div>
+
+    <script src="../../public/assets/js/doctor.js"></script>
+
+    <!-- ── Modal: Configuración del Consultorio ─────────────────── -->
+    <div id="modal-consultorio-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.55); z-index:9999; overflow-y:auto; padding:20px; box-sizing:border-box;">
+        <div style="background:#fff; border-radius:16px; padding:28px; width:min(420px,92vw); margin:auto; box-shadow:0 10px 30px rgba(0,0,0,.25); position:relative; margin-top:5vh;">
+            
+            <!-- Botón cerrar -->
+            <button onclick="cerrarModalConsultorio()" 
+                    style="position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.6rem; cursor:pointer; color:#64748b; line-height:1; padding:0 4px;">×</button>
+
+            <h2 style="margin-bottom:6px; color:#1a237e; font-size:1.1rem;">🏥 Configuración del Consultorio</h2>
+            <p style="font-size:0.82rem; color:#64748b; margin-bottom:20px;">Solo tú puedes editar estos datos. Se mostrarán a todos los usuarios.</p>
+
+            <?php if ($msg_consultorio === 'ok'): ?>
+                <div style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:0.88rem;">
+                    ✅ Consultorio actualizado correctamente.
+                </div>
+            <?php endif; ?>
+
+            <!-- Vista previa del logo actual -->
+            <div style="text-align:center; margin-bottom:18px;">
+                <?php if (!empty($logo_consultorio)): ?>
+                    <img src="../../public/<?php echo htmlspecialchars($logo_consultorio); ?>" 
+                         alt="Logo actual" id="modal-logo-preview"
+                         style="max-height:80px; max-width:180px; object-fit:contain; border:2px solid #e2e8f0; border-radius:10px; padding:6px;">
+                <?php else: ?>
+                    <div id="modal-logo-preview" style="width:80px; height:80px; background:#f1f5f9; border-radius:50%; border:3px solid #059669; display:inline-flex; align-items:center; justify-content:center; font-size:2rem;">🏥</div>
+                <?php endif; ?>
+                <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Logo actual del consultorio</p>
+            </div>
+
+            <form method="POST" action="../../src/consultorio/actualizar_consultorio.php" enctype="multipart/form-data">
+
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-weight:700; margin-bottom:5px; color:#475569; font-size:0.88rem;">Nombre del Consultorio</label>
+                    <input type="text" name="nombre_consultorio" 
+                           value="<?php echo htmlspecialchars($nombre_consultorio); ?>"
+                           placeholder="Ej. Consultorio Privado Dr. Nava"
+                           maxlength="100"
+                           style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:0.92rem; box-sizing:border-box;">
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-weight:700; margin-bottom:5px; color:#475569; font-size:0.88rem;">Logo del Consultorio</label>
+                    <input type="file" name="logo_consultorio" accept="image/*" 
+                           onchange="previewLogo(this)"
+                           style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; background:white; box-sizing:border-box; font-size:0.88rem;">
+                    <small style="color:#64748b; font-size:0.78rem;">JPG, PNG, GIF o WEBP. Máximo 2 MB.</small>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button type="submit" 
+                            style="flex:1; background:#059669; color:white; border:none; padding:11px; border-radius:22px; font-weight:700; cursor:pointer; font-size:0.92rem;">
+                        💾 Guardar
+                    </button>
+                    <button type="button" onclick="cerrarModalConsultorio()"
+                            style="flex:1; background:#f1f5f9; color:#475569; border:1px solid #ddd; padding:11px; border-radius:22px; font-weight:700; cursor:pointer; font-size:0.92rem;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
-    function bloquearDiaCompleto(fechaSeleccionada) {
-        if (!confirm("¿Estás seguro de que deseas bloquear TODO el día " + fechaSeleccionada + "?\nEsta acción inhabilitará todas las horas laborables.")) {
-            return;
+    // Funciones del modal inline — garantizan disponibilidad inmediata
+    function abrirModalConsultorio() {
+        var overlay = document.getElementById('modal-consultorio-overlay');
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    function cerrarModalConsultorio() {
+        var overlay = document.getElementById('modal-consultorio-overlay');
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var preview = document.getElementById('modal-logo-preview');
+                if (preview) {
+                    if (preview.tagName === 'IMG') {
+                        preview.src = e.target.result;
+                    } else {
+                        var img = document.createElement('img');
+                        img.id = 'modal-logo-preview';
+                        img.src = e.target.result;
+                        img.style.cssText = 'max-height:80px; max-width:180px; object-fit:contain; border:2px solid #e2e8f0; border-radius:10px; padding:6px;';
+                        preview.parentNode.replaceChild(img, preview);
+                    }
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
         }
-
-        // Listado de las horas a bloquear (coinciden exactamente con tu bucle PHP de horas)
-        const horasJornada = [
-            '09:00:00', '10:00:00', '11:00:00', '12:00:00', 
-            '13:00:00', '14:00:00', '15:00:00', '16:00:00', 
-            '17:00:00', '18:00:00'
-        ];
-
-        console.log("Iniciando procesamiento de envío de lote para el día: " + fechaSeleccionada);
-
-        // Mapeamos cada hora a una promesa fetch reutilizando tu backend actual individual
-        const promesasDeBloqueo = horasJornada.map(hora => {
-            const formData = new FormData();
-            formData.append('id_horario', '0'); // Al enviar 0 tu backend sabe que debe crear el registro si no existe
-            formData.append('accion', 'bloquear');
-            formData.append('fecha_slot', fechaSeleccionada);
-            formData.append('hora_slot', hora);
-
-            return fetch('../../src/schedule/bloquear_horario.php', {
-                method: 'POST',
-                body: formData
-            });
-        });
-
-        // Esperamos a que todas las horas se procesen en lote en la base de datos
-        Promise.all(promesasDeBloqueo)
-        .then(() => {
-            alert("¡Función de bloqueo masivo completada con éxito para el día " + fechaSeleccionada + "!");
-            location.reload(); // Recarga la página para mostrar los checks como candados rojos
-        })
-        .catch(error => {
-            console.error("Error en el lote:", error);
-            alert("Ocurrió un error al intentar bloquear el día de forma masiva.");
-        });
     }
-
-    // Funciones básicas de interfaz que ya venían con tu dashboard
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebar-overlay').classList.toggle('active');
-    }
-
-    function mostrar(seccion) {
-        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
-        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-        
-        const target = document.getElementById('vista-' + seccion);
-        const menu = document.getElementById('menu-' + seccion);
-        if(target) target.classList.add('activa');
-        if(menu) menu.classList.add('active');
+    // Cerrar al hacer clic fuera del panel
+    document.getElementById('modal-consultorio-overlay').addEventListener('click', function(e) {
+        if (e.target === this) cerrarModalConsultorio();
+    });
+    // Abrir automáticamente si viene ?consultorio=ok
+    if (new URLSearchParams(window.location.search).get('consultorio') === 'ok') {
+        abrirModalConsultorio();
     }
     </script>
 </body>
