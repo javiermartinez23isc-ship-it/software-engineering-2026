@@ -90,13 +90,13 @@ date.timezone=America/Mexico_City
 ```ini
 extension=zip
 ```
-En caso de no encontrarse, buscar ";extension=xsl" y  justo debajo de esta linea se debe agregar "extension=zip" sin comillas asi tal cual como se muestra.
-7. Guarda el archivo. cierra el archivo.
-8. vuelve a abrir XAMPP
-9. Inicia los servicios: 
-10. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
-11. Haz clic en **Start** en la fila de **MySQL**
-12. Ambos deben quedar en **verde** con sus puertos mostrados
+7. En caso de no encontrarse, buscar ";extension=xsl" y  justo debajo de esta linea se debe agregar "extension=zip" sin comillas asi tal cual como se muestra.
+8. Guarda el archivo. cierra el archivo.
+9. vuelve a abrir XAMPP
+10. Inicia los servicios: 
+11. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
+12. Haz clic en **Start** en la fila de **MySQL**
+13. Ambos deben quedar en **verde** con sus puertos mostrados
 
 
 ## 4. Configurar las credenciales de base de datos
