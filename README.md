@@ -92,8 +92,8 @@ extension=zip
 ```
 7. En caso de no encontrarse, buscar ";extension=xsl" y  justo debajo de esta linea se debe agregar "extension=zip" sin comillas asi tal cual como se muestra.
 8. Guarda el archivo. cierra el archivo.
-9. vuelve a abrir XAMPP
-10. Inicia los servicios: 
+9. cierra xampp y vuelve a abrirlo.
+10. apaga y prende los servicios: 
 11. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
 12. Haz clic en **Start** en la fila de **MySQL**
 13. Ambos deben quedar en **verde** con sus puertos mostrados
