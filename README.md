@@ -49,37 +49,20 @@ C:\xampp\htdocs\
 10. Una vez clonado cambiaras de la rama "main" a la rama "desarrollo", mira la esquina inferior izquierda de la ventana de VS Code, verás que aparece el nombre de la rama actual (main).
 12. Haz clic sobre ese nombre, se abrirá una lista en la parte superior de la pantalla con todas tus ramas locales y remotas.
 13. Selecciona la rama "desarrollo".
-
-## 2. Configurar las credenciales de base de datos
-
-1. Dentro de la carpeta del proyecto ve a `config\`
-2. Verás el archivo `db.example.php`
-3. **Cópialo** y renombra la copia como `db.php` — debe quedar así:
+14. Una vez cambies de rama cierra visual studio code y navega a:
 ```
-config\
-    ├── db.example.php   ← archivo original, no tocar
-    └── db.php           ← tu copia con tus credenciales
+C:\xampp\htdocs\
 ```
-4. Abre `db.php` y ajusta los valores según tu instalación:
-$host = "localhost";
-$port = "3307";
-$user = "root";
-$pass = "";
-$db   = "agenda_vital";
-```
+15. Dentro de htdocs encontraras una carpeta llamada software-engineering-2026, renombrala a "AgendaVital", especificamente ese nombre. Necesitaras cerrar visual para que te deje reenombrar la carpeta.
 
-5. Si tu MySQL de XAMPP tiene contraseña, escríbela entre las comillas. Si no tiene contraseña (instalación por defecto), déjala vacía:
-6. **Guarda** el archivo.
 
->  El usuario por defecto de XAMPP es `root` y normalmente no tiene contraseña. Solo cambia `$pass` si configuraste una contraseña diferente.
-
-### 3. Configurar el puerto de MySQL en XAMPP
+### 2. Configurar el puerto de MySQL en XAMPP
 
 Este proyecto usa el puerto **3307** en lugar del 3306 por defecto.
 
 **Cambiar puerto en MySQL:**
-1. Panel XAMPP → fila MySQL → `Config` → `my.ini`
-2. Busca `port=3306` (aparece dos veces) y cámbiala a `port=3307`
+1. Abre xampp (con los 2 servicios apagados) → fila MySQL → `Config` → `my.ini`
+2. Busca `port=3306` (para facilitar la busqueda "Ctrl + b") y cámbia todos a `port=3307`
 3. Guarda y cierra
 
 **Apuntar phpMyAdmin al nuevo puerto:**
@@ -90,31 +73,61 @@ Este proyecto usa el puerto **3307** en lugar del 3306 por defecto.
 $cfg['Servers'][$i]['host'] = '127.0.0.1:3307';
 ```
 4. Guarda y cierra
+5. Al terminar cierra xampp.
 
-### 4. Configurar la zona horaria en PHP
+### 3. Configurar la zona horaria en PHP
 
 1. Abre **XAMPP Control Panel** como administrador
 2. En la fila **Apache** dar clic en el apartado **Config**
 3. Buscar la opción **PHP (php.ini)** y entrar como bloc de notas
-4. Busca `date.timezone` y cámbia a:
+4. Busca (para facilitar la busqueda "Ctrl + b") `date.timezone=Europe/Berlin` y cámbia a:
 ```ini
 date.timezone=America/Mexico_City
 ```
-3. Busca `;extension=zip` y quítale el punto y coma:
+5. Busca (para facilitar la busqueda "Ctrl + b") `;extension=zip` y quítale el punto y coma:
 ```ini
 extension=zip
 ```
-4. Guarda el archivo. cierra y abre xampp.
-5. Iniciar los servicios: 
-6. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
-7. Haz clic en **Start** en la fila de **MySQL**
-8. Ambos deben quedar en **verde** con sus puertos mostrados
+6. Guarda el archivo. cierra y abre xampp como administrador.
+7. Iniciar los servicios: 
+8. En el Panel de XAMPP, haz clic en **Start** en la fila de **Apache**
+9. Haz clic en **Start** en la fila de **MySQL**
+10. Ambos deben quedar en **verde** con sus puertos mostrados
+
+
+## 4. Configurar las credenciales de base de datos
+
+1. Abre visual nuevamente para abrir la carpeta reenombrada, selecciona la opcion File en la esquina superior izquierda de visual studio code.
+2. Clic en la opcion Open Folder,
+3. Despues navega en C:\xampp\htdocs\ dentro de la carpeta htdocs estara la carpeta reenombrada "AgendaVital".
+4. Seleccionala y clic en Select folder.
+5. Una vez dentro de la carpeta del proyecto ve a `config\`
+6. Verás el archivo `db.example.php`
+7. **Cópialo** y pegalo dentro de "config" y renombra la copia como `db.php` — debe quedar así:
+```
+config\
+    ├── db.example.php   ← archivo original, no tocar
+    └── db.php           ← tu copia con tus credenciales
+```
+
+8. Abre `db.php` y ajusta los valores según tu instalación:
+9. $host = "localhost"; "Puerto usado por defecto a la hora de instalar xampp"
+10. $port = "3307";  "Puerto que usa nuestro sistema obligatoriamente".
+11. $user = "root"; "Nombre de usuario por defecto"
+12. $pass = ""; "La instalacion por defecto viene sin contraseña"
+13. $db   = "agenda_vital"; "Este nombre de la base de datos asi se deja obligatoriamente".
+
+14. Si tu MySQL de XAMPP tiene contraseña, escríbela entre las comillas. Si no tiene contraseña (instalación por defecto), déjala vacía:
+15. **Guarda** el archivo.
+
+>  El usuario por defecto de XAMPP es `root` y normalmente no tiene contraseña. Solo cambia `$pass` si configuraste una contraseña diferente.
+
 
 ### 5. Crear la base de datos
 
-1. Inicia Apache y MySQL desde el panel XAMPP 
+1. Revisa que tengas iniciado Apache y MySQL desde el panel XAMPP 
 2. En la fila MySQL selecciona **Admin** que abre la siguiente direción: `http://localhost/phpmyadmin/`
-3. Crea una base de datos llamada `agenda_vital` con cotejamiento `utf8mb4_general_ci`
+3. En el panel izquiero clic en el boton "Nueva", crea una base de datos llamada `agenda_vital` (Obligatoriamente ese nombre).
 4. Selecciona `agenda_vital` en el panel izquierdo
 5. Ve a la pestaña **SQL**
 6. Sigue la siguiente ruta en tu explorador de archivos: `C:\XAMPP\htdocs\AgendaVital\database`
