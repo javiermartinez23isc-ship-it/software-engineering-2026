@@ -23,7 +23,7 @@ header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 $id_user = $_SESSION['usuario_id'];
 $nombre_usuario = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : "Doctor";
 
-// 2. Consulta de citas — solo activas (1,4), con flag si fue reprogramada
+// 2. Consulta de citas — solo activas (1, 2, 4), con flag si fue reprogramada
 $query_citas = "SELECT 
                     c.id_cita, 
                     c.id_usuario, 
@@ -36,10 +36,10 @@ $query_citas = "SELECT
                 INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
                 INNER JOIN horario h ON c.id_horario = h.id_horario 
                 INNER JOIN estado_cita e ON c.id_estado_cita = e.id_estado_cita 
-                WHERE c.id_estado_cita IN (1, 4)
+                WHERE c.id_estado_cita IN (1, 2, 4)
                 AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 ORDER BY 
-                    FIELD(c.id_estado_cita, 1, 4),
+                    FIELD(c.id_estado_cita, 1, 2, 4),
                     h.fecha ASC, h.hora_inicio ASC";
 
 $res_citas   = mysqli_query($conexion, $query_citas);
