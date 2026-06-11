@@ -49,7 +49,7 @@ $row = mysqli_fetch_assoc($res);
 
 // Confirmar la cita
 mysqli_query($conexion,
-    "UPDATE cita SET id_estado_cita = 4, token_confirmacion = NULL
+    "UPDATE cita SET id_estado_cita = 2, token_confirmacion = NULL
      WHERE token_confirmacion = '$token'");
 
 // Formatear fecha y hora
